@@ -1,26 +1,106 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7f9;
+  --foreground: #111318;
+  --surface: #ffffff;
+  --surface-raised: #eceef2;
+  --surface-hover: #e2e5eb;
+  --surface-active: #d6dae2;
+  --muted: #5e6573;
+  --muted-light: #8e95a5;
+  --placeholder: #8e95a5;
+  --primary: #c58316;
+  --primary-hover: #ad7210;
+  --primary-foreground: #ffffff;
+  --primary-subtle: #fdf5e6;
+  --card: #ffffff;
+  --card-hover: #fafbfc;
+  --accent-gold: #c58316;
+  --accent-gold-bg: #fdf5e6;
+  --accent-green: #15803d;
+  --accent-green-bg: #eaf7ee;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+}
+
+.dark {
+  --background: #0d0f14;
+  --foreground: #f4f5f7;
+  --surface: #141720;
+  --surface-raised: #1c202c;
+  --surface-hover: #242938;
+  --surface-active: #2d3345;
+  --muted: #9aa1b2;
+  --muted-light: #6a7182;
+  --placeholder: #6a7182;
+  --primary: #e5a93c;
+  --primary-hover: #f0b84e;
+  --primary-foreground: #0d0f14;
+  --primary-subtle: #261e13;
+  --card: #141720;
+  --card-hover: #191d28;
+  --accent-gold: #e5a93c;
+  --accent-gold-bg: #261e13;
+  --accent-green: #34d399;
+  --accent-green-bg: #0e251b;
+  --danger: #ef4444;
+  --danger-bg: #291414;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-muted: var(--muted);
+  --color-muted-light: var(--muted-light);
+  --color-placeholder: var(--placeholder);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-gold-bg: var(--accent-gold-bg);
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-bg: var(--accent-green-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --font-sans: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-mono: var(--font-mono), monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-editorial {
+  font-family: var(--font-serif);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-raised);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-hover);
 }
