@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "almost — almost yours | Wishlist Manager",
+  title: "almost • almost yours | Wishlist Manager",
   description:
     "A clean, simple wishlist manager to save things you want, track your savings, and know when you can afford them.",
 };

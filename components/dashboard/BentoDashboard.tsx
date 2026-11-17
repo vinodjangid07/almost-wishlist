@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { PencilSimple } from "@phosphor-icons/react";
@@ -10,7 +10,7 @@ interface BentoDashboardProps {
   onOpenAddWish: () => void;
 }
 
-export const BentoDashboard: React.FC<BentoDashboardProps> = ({
+export const BentoDashboard: React.FC<BentoDashboardProps> = React.memo(({
   onOpenEditSavings,
 }) => {
   const {
@@ -22,10 +22,20 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
   } = useSavings();
   const { wishes, loading } = useWishlist();
 
-  const activeCount = wishes.filter((w) => !w.isPurchased).length;
-  const affordableCount = wishes.filter(
-    (w) => !w.isPurchased && currentSavings >= w.estimatedPrice
-  ).length;
+  const { activeCount, affordableCount } = useMemo(() => {
+    let active = 0;
+    let affordable = 0;
+    for (let i = 0; i < wishes.length; i++) {
+      const w = wishes[i];
+      if (!w.isPurchased) {
+        active++;
+        if (currentSavings >= w.estimatedPrice) {
+          affordable++;
+        }
+      }
+    }
+    return { activeCount: active, affordableCount: affordable };
+  }, [wishes, currentSavings]);
 
   if (loading && wishes.length === 0 && currentSavings === 0) {
     return (
@@ -46,7 +56,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
       {/* 1: Savings */}
       <div
         onClick={onOpenEditSavings}
-        className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] hover:bg-[var(--card-hover)] transition cursor-pointer group flex flex-col justify-between space-y-2.5"
+        className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--card-hover)] transition cursor-pointer group flex flex-col justify-between space-y-2.5"
         title="Click to edit savings"
       >
         <div className="flex items-center justify-between">
@@ -65,7 +75,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
       </div>
 
       {/* 2: Wishlist Total */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] flex flex-col justify-between space-y-2.5">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-[var(--muted)]">Wishlist</span>
           <span className="text-[11px] text-[var(--muted)] font-medium">
@@ -84,7 +94,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
       </div>
 
       {/* 3: Remaining Gap */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] flex flex-col justify-between space-y-2.5">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-[var(--muted)]">Gap</span>
           <span className="text-[11px] text-[var(--muted)] font-medium">
@@ -109,7 +119,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
       </div>
 
       {/* 4: Summary / Status */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] flex flex-col justify-between space-y-2.5">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-[var(--muted)]">Summary</span>
           <span className="text-[11px] text-[var(--muted)] font-medium">
@@ -133,4 +143,6 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+BentoDashboard.displayName = "BentoDashboard";

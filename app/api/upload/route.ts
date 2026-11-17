@@ -9,6 +9,15 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: "No file body provided" }, { status: 400 });
   }
 
+  // Enforce a strict 5MB limit to prevent excessive Vercel Blob API usage and bandwidth abuse
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > 5 * 1024 * 1024) {
+    return NextResponse.json(
+      { error: "File exceeds 5MB limit. Please upload a smaller image." },
+      { status: 413 }
+    );
+  }
+
   try {
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       console.warn("BLOB_READ_WRITE_TOKEN is missing in environment variables.");

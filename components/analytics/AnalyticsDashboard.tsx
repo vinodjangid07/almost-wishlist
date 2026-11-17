@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
 import {
@@ -16,7 +16,7 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export const AnalyticsDashboard: React.FC = () => {
+export const AnalyticsDashboard: React.FC = React.memo(() => {
   const { wishes } = useWishlist();
   const {
     currentSavings,
@@ -74,7 +74,7 @@ export const AnalyticsDashboard: React.FC = () => {
   }, [activeWishes]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customTooltip = ({ active, payload }: any) => {
+  const customTooltip = useCallback(({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
@@ -87,14 +87,14 @@ export const AnalyticsDashboard: React.FC = () => {
       );
     }
     return null;
-  };
+  }, [currency]);
 
   return (
     <div className="space-y-4 select-none">
-      {/* Bento Charts Grid (Duplicated KPI stat cards removed) */}
+      {/* Bento Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {/* Donut 1: Need vs Want vs Luxury */}
-        <div className="p-5 rounded-2xl bg-[var(--surface)] flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
           <div>
             <span className="text-xs font-medium text-[var(--muted)] block">
               Cost Breakdown
@@ -137,7 +137,7 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
 
         {/* Donut 2: Savings vs Wishlist Gap */}
-        <div className="p-5 rounded-2xl bg-[var(--surface)] flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between">
           <div>
             <span className="text-xs font-medium text-[var(--muted)] block">
               Affordability
@@ -179,7 +179,7 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
 
         {/* Bar Chart: Categories */}
-        <div className="p-5 rounded-2xl bg-[var(--surface)] flex flex-col justify-between md:col-span-2">
+        <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between md:col-span-2">
           <div>
             <span className="text-xs font-medium text-[var(--muted)] block">
               Categories
@@ -197,7 +197,7 @@ export const AnalyticsDashboard: React.FC = () => {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--surface-raised)" opacity={0.6} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" opacity={0.7} />
                   <XAxis
                     dataKey="category"
                     stroke="var(--muted)"
@@ -207,7 +207,13 @@ export const AnalyticsDashboard: React.FC = () => {
                   />
                   <YAxis stroke="var(--muted)" fontSize={11} tickFormatter={(v) => `₹${v / 1000}k`} />
                   <Tooltip content={customTooltip} />
-                  <Bar dataKey="cost" fill="var(--primary)" radius={[6, 6, 0, 0]} />
+                  <Bar
+                    dataKey="cost"
+                    fill="var(--primary)"
+                    fillOpacity={0.88}
+                    maxBarSize={48}
+                    radius={[6, 6, 2, 2]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -215,33 +221,33 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
 
         {/* Top 5 Most Expensive Items */}
-        <div className="p-5 rounded-2xl bg-[var(--surface)] md:col-span-2">
+        <div className="p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] md:col-span-2">
           <span className="text-xs font-medium text-[var(--muted)] block">
             Most Expensive Items
           </span>
-          <h4 className="text-sm font-semibold text-[var(--foreground)] mt-0.5 mb-3">
+          <h4 className="text-sm font-semibold text-[var(--foreground)] mt-0.5 mb-2">
             Top 5 Highest Priced Wishes
           </h4>
 
           {top5Expensive.length === 0 ? (
             <p className="text-xs text-[var(--muted)]">No active wishes in your list.</p>
           ) : (
-            <div className="space-y-2">
+            <div className="divide-y divide-[var(--border-subtle)]">
               {top5Expensive.map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-3 rounded-xl bg-[var(--surface-raised)] text-xs"
+                  className="flex items-center justify-between py-2.5 px-1.5 rounded-lg text-xs hover:bg-[var(--surface-hover)] transition"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-[var(--surface-hover)] flex items-center justify-center font-bold text-[11px] text-[var(--primary)]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-md bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center font-bold text-[10px] text-[var(--muted)] shrink-0">
                       {idx + 1}
                     </span>
                     <span className="font-medium text-[var(--foreground)]">{item.name}</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface)] text-[var(--muted)]">
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-[var(--muted)] border border-[var(--border-subtle)] capitalize">
                       {item.tag}
                     </span>
                   </div>
-                  <span className="font-bold tabular-nums text-[var(--foreground)]">
+                  <span className="font-bold tabular-nums text-[var(--foreground)] shrink-0">
                     {currency}{item.price.toLocaleString("en-IN")}
                   </span>
                 </div>
@@ -252,4 +258,6 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
     </div>
   );
-};
+});
+
+AnalyticsDashboard.displayName = "AnalyticsDashboard";

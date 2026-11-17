@@ -1,10 +1,14 @@
 "use client";
 
 import React from "react";
-import { useWishlist, SortOption, AffordabilityFilter } from "@/contexts/WishlistContext";
+import {
+  useWishlist,
+  SortOption,
+  AffordabilityFilter,
+} from "@/contexts/WishlistContext";
 import { CaretDown } from "@phosphor-icons/react";
 
-export const WishlistToolbar: React.FC = () => {
+export const WishlistToolbar: React.FC = React.memo(() => {
   const {
     tagFilter,
     setTagFilter,
@@ -18,59 +22,42 @@ export const WishlistToolbar: React.FC = () => {
   } = useWishlist();
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between select-none pt-1">
-      {/* Segmented Classification Filter Pills (Exact h-9 container) */}
-      <div className="h-9 p-1 flex items-center gap-1 bg-[var(--surface)] rounded-xl shrink-0 self-start sm:self-auto">
-        <button
-          onClick={() => setTagFilter("all")}
-          className={`h-7 px-3 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-            tagFilter === "all"
-              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-          }`}
-        >
-          All Items
-        </button>
-        <button
-          onClick={() => setTagFilter("need")}
-          className={`h-7 px-3 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-            tagFilter === "need"
-              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-          }`}
-        >
-          Need
-        </button>
-        <button
-          onClick={() => setTagFilter("want")}
-          className={`h-7 px-3 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-            tagFilter === "want"
-              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-          }`}
-        >
-          Want
-        </button>
-        <button
-          onClick={() => setTagFilter("luxury")}
-          className={`h-7 px-3 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-            tagFilter === "luxury"
-              ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-              : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-          }`}
-        >
-          Luxury
-        </button>
+    <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between select-none">
+      {/* Segmented Classification Filter Pills (Exact h-10 matching sidebar controls) */}
+      <div className="h-10 p-1 flex items-center gap-1 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl shrink-0 self-start sm:self-auto">
+        {(
+          [
+            { id: "all", label: "All" },
+            { id: "need", label: "Need" },
+            { id: "want", label: "Want" },
+            { id: "luxury", label: "Luxury" },
+          ] as const
+        ).map((tab) => {
+          const isActive = tagFilter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setTagFilter(tab.id)}
+              className={`h-8 px-3.5 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
+                isActive
+                  ? "bg-[var(--foreground)] text-[var(--background)] shadow-xs"
+                  : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Right: Dropdown Filters (Category, Affordability Status, Sort - all exact h-9) */}
+      {/* Right: Dropdown Filters (Exact h-10 matching baseline) */}
       <div className="flex flex-wrap items-center gap-2">
         {/* Category Select */}
-        <div className="relative h-9">
+        <div className="relative h-10">
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="h-9 appearance-none bg-[var(--surface)] hover:bg-[var(--surface-hover)] rounded-xl pl-3 pr-7 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
+            className="h-10 appearance-none bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl pl-3.5 pr-8 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
           >
             <option value="all">Category: All</option>
             {categories.map((cat) => (
@@ -81,16 +68,18 @@ export const WishlistToolbar: React.FC = () => {
           </select>
           <CaretDown
             size={12}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
           />
         </div>
 
         {/* Affordability Select */}
-        <div className="relative h-9">
+        <div className="relative h-10">
           <select
             value={affordabilityFilter}
-            onChange={(e) => setAffordabilityFilter(e.target.value as AffordabilityFilter)}
-            className="h-9 appearance-none bg-[var(--surface)] hover:bg-[var(--surface-hover)] rounded-xl pl-3 pr-7 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
+            onChange={(e) =>
+              setAffordabilityFilter(e.target.value as AffordabilityFilter)
+            }
+            className="h-10 appearance-none bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl pl-3.5 pr-8 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
           >
             <option value="all">Status: All</option>
             <option value="affordable">Can afford now</option>
@@ -98,16 +87,16 @@ export const WishlistToolbar: React.FC = () => {
           </select>
           <CaretDown
             size={12}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
           />
         </div>
 
         {/* Sort Select */}
-        <div className="relative h-9">
+        <div className="relative h-10">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="h-9 appearance-none bg-[var(--surface)] hover:bg-[var(--surface-hover)] rounded-xl pl-3 pr-7 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
+            className="h-10 appearance-none bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl pl-3.5 pr-8 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
           >
             <option value="date-desc">Newest first</option>
             <option value="date-asc">Oldest first</option>
@@ -117,10 +106,12 @@ export const WishlistToolbar: React.FC = () => {
           </select>
           <CaretDown
             size={12}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
           />
         </div>
       </div>
     </div>
   );
-};
+});
+
+WishlistToolbar.displayName = "WishlistToolbar";

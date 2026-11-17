@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { WishItem } from "@/types";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
-import { CheckCircle, Circle, PencilSimple, Trash, ArrowSquareOut } from "@phosphor-icons/react";
+import { CheckCircle, Circle, PencilSimple, Trash, ArrowSquareOut, UsersThree } from "@phosphor-icons/react";
 import { DeleteConfirmModal } from "@/components/modals/DeleteConfirmModal";
 
 interface WishCardProps {
@@ -13,27 +13,36 @@ interface WishCardProps {
   onViewDetail: (wish: WishItem) => void;
 }
 
-export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }) => {
-  const { deleteWish, togglePurchased } = useWishlist();
+export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onViewDetail }) => {
+  const { deleteWish, toggleFulfilled } = useWishlist();
   const { currency } = useSavings();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const handleTogglePurchased = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    togglePurchased(wish.id);
-  };
+  const isFulfilled = Boolean(wish.isFulfilled ?? wish.isPurchased);
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
+  const memberCount = wish.memberUids?.length || (wish.members ? Object.keys(wish.members).length : 1);
+
+  const pooledSavings = useMemo(() => {
+    if (!wish.members) return 0;
+    return Object.values(wish.members).reduce((sum, m) => sum + (m.savedAmount || 0), 0);
+  }, [wish.members]);
+
+  const handleToggleFulfilled = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFulfilled(wish.id);
+  }, [toggleFulfilled, wish.id]);
+
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleteModalOpen(true);
-  };
+  }, []);
 
   return (
     <>
       <div
         onClick={() => onViewDetail(wish)}
-        className={`group relative flex flex-col justify-between rounded-2xl bg-[var(--surface)] hover:bg-[var(--card-hover)] transition-all duration-200 cursor-pointer overflow-hidden ${
-          wish.isPurchased ? "opacity-60" : ""
+        className={`group relative flex flex-col justify-between rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--card-hover)] transition-all duration-200 cursor-pointer overflow-hidden ${
+          isFulfilled ? "opacity-60" : ""
         }`}
       >
         {/* Top Image Preview */}
@@ -44,7 +53,7 @@ export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }
               src={wish.imageUrl}
               alt={wish.title}
               className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-103 ${
-                wish.isPurchased ? "grayscale" : ""
+                isFulfilled ? "grayscale" : ""
               }`}
             />
           ) : (
@@ -53,10 +62,18 @@ export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }
             </div>
           )}
 
-          {wish.isPurchased && (
+          {/* Collaborative Badge */}
+          {wish.isShared && (
+            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium">
+              <UsersThree size={13} weight="bold" />
+              <span>{memberCount} {memberCount === 1 ? "friend" : "friends"}</span>
+            </div>
+          )}
+
+          {isFulfilled && (
             <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center">
               <span className="text-xs font-semibold px-4 py-1.5 rounded-full bg-white text-black">
-                Purchased
+                Fulfilled
               </span>
             </div>
           )}
@@ -83,7 +100,7 @@ export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }
             )}
           </div>
 
-          {/* Price & Links */}
+          {/* Price & Progress */}
           <div className="space-y-2">
             <div className="flex items-baseline justify-between gap-2">
               <div className="flex items-baseline gap-1">
@@ -98,6 +115,12 @@ export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }
                   </span>
                 )}
               </div>
+
+              {wish.isShared && pooledSavings > 0 && (
+                <span className="text-[11px] font-semibold text-[var(--accent-green)] tabular-nums">
+                  {currency}{pooledSavings.toLocaleString("en-IN")} pooled
+                </span>
+              )}
             </div>
 
             {/* Sourcing Stores */}
@@ -123,22 +146,22 @@ export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }
           {/* Card Action Row */}
           <div className="flex items-center justify-between pt-1">
             <button
-              onClick={handleTogglePurchased}
+              onClick={handleToggleFulfilled}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
-                wish.isPurchased
+                isFulfilled
                   ? "bg-[var(--accent-green-bg)] text-[var(--accent-green)]"
                   : "bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-[var(--foreground)]"
               }`}
             >
-              {wish.isPurchased ? (
+              {isFulfilled ? (
                 <>
                   <CheckCircle size={14} weight="fill" />
-                  <span>Bought</span>
+                  <span>Fulfilled</span>
                 </>
               ) : (
                 <>
                   <Circle size={14} weight="regular" />
-                  <span>Mark Bought</span>
+                  <span>Mark Fulfilled</span>
                 </>
               )}
             </button>
@@ -174,4 +197,6 @@ export const WishCard: React.FC<WishCardProps> = ({ wish, onEdit, onViewDetail }
       />
     </>
   );
-};
+});
+
+WishCard.displayName = "WishCard";

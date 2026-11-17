@@ -1,44 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { SmoothScroll } from "@/components/landing/SmoothScroll";
 import {
   ArrowRight,
-  ArrowUpRight,
-  CheckCircle,
-  CurrencyInr,
-  SlidersHorizontal,
-  LockKey,
   ShieldCheck,
-  Sparkle,
+  LockKey,
+  SquaresFour,
 } from "@phosphor-icons/react";
 
 export default function LandingPage() {
-  // Interactive live simulator state
-  const [simulatedSavings, setSimulatedSavings] = useState(350000);
-  const totalTarget = 1003390;
-  const gap = Math.max(0, totalTarget - simulatedSavings);
-  const coveredPercent = Math.min(100, Math.round((simulatedSavings / totalTarget) * 100));
-
-  const items = [
-    { name: "Sony WH-1000XM5", price: 26990, tag: "Want", cat: "Tech" },
-    { name: "Keychron Q1 Pro", price: 18500, tag: "Want", cat: "Tech" },
-    { name: "Herman Miller Aeron", price: 115000, tag: "Need", cat: "Living" },
-    { name: "MacBook Pro 14\"", price: 169900, tag: "Need", cat: "Work" },
-    { name: "Rimowa Classic Cabin", price: 128000, tag: "Luxury", cat: "Travel" },
-    { name: "Leica Q3 Camera", price: 545000, tag: "Luxury", cat: "Optics" },
-  ];
-
-  const affordableCount = items.filter((item) => simulatedSavings >= item.price).length;
-
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--foreground)] selection:text-[var(--background)] font-sans antialiased overflow-x-hidden">
       <SmoothScroll />
 
-      {/* Atmospheric Top Bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/85 backdrop-blur-md select-none transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 h-18 flex items-center justify-between">
+      {/* Clean Navigation Bar */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/85 backdrop-blur-md select-none transition-all duration-300 border-b border-[var(--border-subtle)]">
+        <div className="max-w-7xl mx-auto px-6 sm:px-10 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-baseline gap-2.5 group cursor-pointer">
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--foreground)] group-hover:text-[var(--primary)] transition">
               almost
@@ -48,264 +27,141 @@ export default function LandingPage() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--surface)] text-[11px] text-[var(--muted)] font-medium">
-              <span className="w-2 h-2 rounded-full bg-[var(--accent-green)] animate-pulse" />
-              <span>v2.0 • Active Ledger</span>
-            </div>
-
+          <div>
             <Link
               href="/app"
-              className="h-9 inline-flex items-center gap-2 px-4 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer"
+              className="h-10 inline-flex items-center gap-2 px-5 rounded-full text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer shadow-xs"
             >
-              <span>Open Wishlist</span>
-              <ArrowRight size={14} weight="bold" />
+              <span>Wishlist</span>
+              <ArrowRight size={13} weight="bold" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Architectural Hero */}
-      <main className="pt-32 sm:pt-40 pb-24 px-6 sm:px-10 max-w-7xl mx-auto space-y-28 sm:space-y-36">
-        {/* Hero Section */}
-        <section className="space-y-10 sm:space-y-12">
-          <div className="space-y-6 max-w-4xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--surface)] text-xs font-medium text-[var(--muted)]">
-              <span className="text-[var(--primary)] font-semibold">The Intentional Ledger</span>
-              <span>—</span>
-              <span>Delay impulse. Own with clarity.</span>
-            </div>
-
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight text-[var(--foreground)] leading-[0.96] text-balance">
-              Save what you desire.
-              <br />
-              <span className="text-[var(--muted)]">Own when you afford.</span>
-            </h1>
-
-            <p className="text-base sm:text-xl text-[var(--muted)] max-w-2xl leading-relaxed text-balance">
-              A quiet luxury wishlist manager that transforms impulsive shopping into intentional ownership.
-              Classify your wishes into Need, Want, and Luxury, track your true savings gap, and purchase with zero guilt.
+      {/* Main Content */}
+      <main className="pt-32 sm:pt-40 pb-24 px-6 sm:px-10 max-w-7xl mx-auto space-y-24 sm:space-y-32">
+        {/* Hero Section (Centered Minimalist Architecture) */}
+        <section className="text-center space-y-8 sm:space-y-10">
+          <div className="space-y-3.5 max-w-3xl mx-auto">
+            {/* Clean Editorial Eyebrow (No pill box, no dot indicator, sentence-case) */}
+            <p className="text-xs sm:text-sm font-medium text-[var(--primary)] select-none">
+              Intentional wishlist manager
             </p>
 
-            <div className="pt-2 flex flex-wrap items-center gap-3.5">
-              <Link
-                href="/app"
-                className="h-11 inline-flex items-center gap-2 px-6 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer"
-              >
-                <span>Launch Your Ledger</span>
-                <ArrowRight size={15} weight="bold" />
-              </Link>
-              <Link
-                href="/app?seed=true"
-                className="h-11 inline-flex items-center gap-2 px-5 rounded-xl text-xs font-semibold bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer"
-              >
-                <span>Explore Live Demo</span>
-                <ArrowUpRight size={14} />
-              </Link>
-            </div>
+            {/* Refined, Scaled Headline */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--foreground)] leading-[1.12] text-balance">
+              A New Standard
+              <br />
+              in Mindful Ownership
+            </h1>
+
+            {/* Clean Subtitle */}
+            <p className="text-sm sm:text-base text-[var(--muted)] max-w-xl mx-auto leading-relaxed text-balance pt-1">
+              Take full control of your desires with a unified platform for classifying, budgeting, and pooling savings for the things worth waiting for.
+            </p>
           </div>
 
-          {/* Interactive Live Formula Calculator (Signature Moment) */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[var(--surface)] space-y-6 select-none">
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 pb-2">
-              <div>
-                <span className="text-xs font-medium text-[var(--primary)] block mb-0.5">
-                  The &ldquo;Almost&rdquo; Formula
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">
-                  Live Gap Simulation
-                </h3>
-              </div>
-              <p className="text-xs text-[var(--muted)] max-w-xs">
-                Drag the slider to test how real savings close the distance to your curated wishlist.
-              </p>
-            </div>
-
-            {/* Metric Blocks */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-4 rounded-2xl bg-[var(--background)]">
-                <span className="text-[11px] text-[var(--muted)] font-medium block">
-                  Simulated Savings
-                </span>
-                <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)] block mt-1">
-                  ₹{simulatedSavings.toLocaleString("en-IN")}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--background)]">
-                <span className="text-[11px] text-[var(--muted)] font-medium block">
-                  Wishlist Total (6 items)
-                </span>
-                <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)] block mt-1">
-                  ₹{totalTarget.toLocaleString("en-IN")}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--background)]">
-                <span className="text-[11px] text-[var(--muted)] font-medium block">
-                  Remaining Gap
-                </span>
-                <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)] block mt-1">
-                  ₹{gap.toLocaleString("en-IN")}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[var(--background)]">
-                <div className="flex items-center justify-between text-[11px] text-[var(--muted)] font-medium">
-                  <span>Covered</span>
-                  <span className="font-semibold text-[var(--accent-green)]">{coveredPercent}%</span>
-                </div>
-                <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)] block mt-1">
-                  {affordableCount} <span className="text-xs font-normal text-[var(--muted)]">affordable now</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Slider Control */}
-            <div className="space-y-2 pt-2">
-              <div className="flex items-center justify-between text-xs text-[var(--muted)]">
-                <span className="flex items-center gap-1.5">
-                  <SlidersHorizontal size={14} />
-                  <span>Adjust Savings Amount:</span>
-                </span>
-                <span className="font-semibold text-[var(--foreground)] tabular-nums">
-                  ₹{simulatedSavings.toLocaleString("en-IN")}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max={totalTarget}
-                step="5000"
-                value={simulatedSavings}
-                onChange={(e) => setSimulatedSavings(Number(e.target.value))}
-                className="w-full h-2 bg-[var(--surface-hover)] rounded-lg appearance-none cursor-pointer accent-[var(--primary)]"
+          {/* Screenshot Showcase (Direct, Pure Image with Rounded Corners & Hairline Border) */}
+          <div className="max-w-5xl mx-auto select-none pt-4">
+            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/preview/dashboard-preview.webp"
+                alt="Almost Dashboard Interface Preview"
+                className="w-full h-auto object-cover block"
+                loading="eager"
               />
-              <div className="flex justify-between text-[10px] text-[var(--muted)] pt-0.5">
-                <span>₹0 (Starting point)</span>
-                <span>₹5,00,000 (Midway milestone)</span>
-                <span>₹10,03,390 (100% Unlocked)</span>
-              </div>
-            </div>
-
-            {/* Item Availability Chips */}
-            <div className="pt-3">
-              <span className="text-xs font-medium text-[var(--muted)] block mb-2.5">
-                Real-Time Item Affordability Status:
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                {items.map((item, idx) => {
-                  const unlocked = simulatedSavings >= item.price;
-                  return (
-                    <div
-                      key={idx}
-                      className={`p-3 rounded-xl transition duration-200 text-xs ${
-                        unlocked
-                          ? "bg-[var(--accent-green-bg)] text-[var(--accent-green)]"
-                          : "bg-[var(--background)] text-[var(--muted)] opacity-60"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider">
-                          {item.tag}
-                        </span>
-                        {unlocked && <CheckCircle size={12} weight="fill" />}
-                      </div>
-                      <p className="font-semibold truncate text-[var(--foreground)]">
-                        {item.name}
-                      </p>
-                      <span className="text-[11px] tabular-nums font-medium block mt-0.5">
-                        ₹{item.price.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </section>
 
-        {/* Section 2: Manifesto / Philosophy */}
-        <section className="space-y-12">
-          <div className="max-w-3xl space-y-4">
-            <span className="text-xs font-semibold text-[var(--primary)] uppercase tracking-wider block">
-              The Philosophy
-            </span>
+        {/* Section 2: Principles */}
+        <section id="principles" className="space-y-10 scroll-mt-24">
+          <div className="max-w-3xl space-y-3">
             <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-[var(--foreground)] leading-tight">
               Patience is luxury.
               <br />
               The objects worth having are worth waiting for.
             </h2>
             <p className="text-sm sm:text-base text-[var(--muted)] leading-relaxed">
-              Consumer commerce is engineered for instant gratification — impulsive cart checkouts that lead to remorse.
-              Almost restores dignity to your spending through structural clarity.
+              Instant checkouts often lead to buyer regret. Almost brings clarity to your spending through four quiet principles.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-7 rounded-3xl bg-[var(--surface)] space-y-3">
-              <span className="text-xs font-semibold text-[var(--primary)] block">
-                01 • The Three Tiers
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-bold text-[var(--primary)]">
+                01
               </span>
               <h3 className="text-base font-semibold text-[var(--foreground)]">
                 Need, Want, and Luxury
               </h3>
               <p className="text-xs text-[var(--muted)] leading-relaxed">
-                Categorize purchases with brutal honesty. Is it a tool for your craft (Need), a comfort you desire (Want), or a high-ticket dream piece (Luxury)? Never confuse them again.
+                Categorize purchases with honesty. Separate essential work tools from everyday comforts and high-ticket splurges. Never blur them together.
               </p>
             </div>
 
-            <div className="p-7 rounded-3xl bg-[var(--surface)] space-y-3">
-              <span className="text-xs font-semibold text-[var(--primary)] block">
-                02 • The Truth of the Gap
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-bold text-[var(--primary)]">
+                02
               </span>
               <h3 className="text-base font-semibold text-[var(--foreground)]">
-                One uncompromising metric
+                The Savings Gap
               </h3>
               <p className="text-xs text-[var(--muted)] leading-relaxed">
-                Enter your total liquid savings with one click. The dashboard immediately calculates the gap between your present reality and your desires. No guessing.
+                Enter your current savings with one tap. The dashboard immediately shows the exact difference between what you have and what you want.
               </p>
             </div>
 
-            <div className="p-7 rounded-3xl bg-[var(--surface)] space-y-3">
-              <span className="text-xs font-semibold text-[var(--primary)] block">
-                03 • Multi-Store Sourcing
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-bold text-[var(--primary)]">
+                03
               </span>
               <h3 className="text-base font-semibold text-[var(--foreground)]">
-                Arbitrage across retailers
+                Collaborative Goals
               </h3>
               <p className="text-xs text-[var(--muted)] leading-relaxed">
-                Save links from Amazon, Apple, Leica, or niche stores on each item. Compare prices, track min/max variations, and execute the purchase at the best price.
+                Pool savings with friends or family for shared trips, studio gear, or joint celebrations. Track collective progress with an invite code.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-3">
+              <span className="w-8 h-8 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] flex items-center justify-center text-xs font-bold text-[var(--primary)]">
+                04
+              </span>
+              <h3 className="text-base font-semibold text-[var(--foreground)]">
+                Multi-Store Sourcing
+              </h3>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Save links from Amazon, Apple, Leica, or independent stores on every wish. Compare prices and purchase at the right time.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Section 3: Curated Showcase (Visual Poster Grid) */}
+        {/* Section 3: Curated Objects Showcase */}
         <section className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
-              <span className="text-xs font-semibold text-[var(--primary)] uppercase tracking-wider block">
-                The Objects
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)] mt-1">
-                Curated Desire Showcase
+              <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)]">
+                Curated objects
               </h2>
+              <p className="text-xs text-[var(--muted)] mt-1 max-w-sm">
+                Organize high-value items with detailed notes, store comparisons, and priority levels.
+              </p>
             </div>
-            <p className="text-xs text-[var(--muted)] max-w-sm">
-              Explore how real high-value items live inside the Almost ledger with rich metadata and price sourcing.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Card 1 */}
-            <div className="group rounded-3xl bg-[var(--surface)] overflow-hidden transition-all duration-300">
+            <div className="rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-300">
               <div className="h-60 w-full overflow-hidden bg-[var(--background)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80"
                   alt="Leica Q3 Camera"
-                  className="w-full h-full object-cover group-hover:scale-103 transition duration-500"
+                  className="w-full h-full object-cover hover:scale-102 transition duration-500"
                 />
               </div>
               <div className="p-5 space-y-2">
@@ -329,13 +185,13 @@ export default function LandingPage() {
             </div>
 
             {/* Card 2 */}
-            <div className="group rounded-3xl bg-[var(--surface)] overflow-hidden transition-all duration-300">
+            <div className="rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-300">
               <div className="h-60 w-full overflow-hidden bg-[var(--background)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80"
                   alt="MacBook Pro"
-                  className="w-full h-full object-cover group-hover:scale-103 transition duration-500"
+                  className="w-full h-full object-cover hover:scale-102 transition duration-500"
                 />
               </div>
               <div className="p-5 space-y-2">
@@ -359,13 +215,13 @@ export default function LandingPage() {
             </div>
 
             {/* Card 3 */}
-            <div className="group rounded-3xl bg-[var(--surface)] overflow-hidden transition-all duration-300">
+            <div className="rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] overflow-hidden transition-all duration-300">
               <div className="h-60 w-full overflow-hidden bg-[var(--background)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=1200&q=80"
                   alt="Rimowa Cabin"
-                  className="w-full h-full object-cover group-hover:scale-103 transition duration-500"
+                  className="w-full h-full object-cover hover:scale-102 transition duration-500"
                 />
               </div>
               <div className="p-5 space-y-2">
@@ -390,44 +246,47 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Section 4: Privacy & Simplicity Statement */}
-        <section className="p-8 sm:p-12 rounded-3xl bg-[var(--surface)] space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <span className="text-xs font-semibold text-[var(--primary)] uppercase tracking-wider block">
-                Frictionless &amp; Private
-              </span>
-              <h2 className="text-2xl sm:text-4xl font-bold text-[var(--foreground)] leading-tight">
-                No forced signups.
-                <br />
-                Works instantly offline and on mobile.
-              </h2>
-              <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
-                Start adding wishes in three seconds as a guest. When you are ready, sign in with Google or Email to sync across your phone, tablet, and desktop in real time with Firebase.
+        {/* Section 4: Privacy & Focus (Flat Minimal Architecture, Zero Russian-Doll Cards) */}
+        <section className="p-8 sm:p-12 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-8">
+          <div className="max-w-2xl space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-bold text-[var(--foreground)] leading-tight">
+              Private by default.
+              <br />
+              Designed for focus.
+            </h2>
+            <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
+              Curate your collection in a distraction-free space. Sync seamlessly across your devices with your own account when you are ready.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 border-t border-[var(--border-subtle)] text-xs">
+            <div className="space-y-1.5 pt-2">
+              <ShieldCheck size={22} className="text-[var(--accent-green)]" />
+              <p className="font-semibold text-[var(--foreground)] text-sm pt-1">Zero Tracking</p>
+              <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+                Your desires, notes, and finances are completely private to you. No behavioral tracking, no third-party ads.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-4 rounded-2xl bg-[var(--background)] space-y-1">
-                <ShieldCheck size={20} className="text-[var(--accent-green)]" />
-                <p className="font-semibold text-[var(--foreground)] pt-1">Zero Tracking</p>
-                <span className="text-[11px] text-[var(--muted)] leading-normal block">
-                  Your wishes and finances are strictly private to your account.
-                </span>
-              </div>
+            <div className="space-y-1.5 pt-2">
+              <SquaresFour size={22} className="text-[var(--primary)]" />
+              <p className="font-semibold text-[var(--foreground)] text-sm pt-1">Client First</p>
+              <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+                Immediate responsive interaction with instant local caching. Fast, elegant, and whisper-quiet.
+              </p>
+            </div>
 
-              <div className="p-4 rounded-2xl bg-[var(--background)] space-y-1">
-                <LockKey size={20} className="text-[var(--primary)]" />
-                <p className="font-semibold text-[var(--foreground)] pt-1">Cloud Sync</p>
-                <span className="text-[11px] text-[var(--muted)] leading-normal block">
-                  Powered by Google Firebase and Vercel Blob private storage.
-                </span>
-              </div>
+            <div className="space-y-1.5 pt-2">
+              <LockKey size={22} className="text-[var(--foreground)]" />
+              <p className="font-semibold text-[var(--foreground)] text-sm pt-1">Real-Time Cloud Sync</p>
+              <p className="text-[11px] text-[var(--muted)] leading-relaxed">
+                Connect your account in seconds to seamlessly sync across your desktop, tablet, and mobile in real time.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Section 5: Architectural Call To Action */}
+        {/* Section 5: Call To Action */}
         <section className="text-center space-y-6 py-8">
           <h2 className="text-4xl sm:text-6xl font-bold text-[var(--foreground)] tracking-tight text-balance">
             Close the gap between
@@ -435,22 +294,22 @@ export default function LandingPage() {
             wanting and owning.
           </h2>
           <p className="text-sm sm:text-base text-[var(--muted)] max-w-lg mx-auto leading-relaxed">
-            Begin curating your wishlist today. Free, fast, and crafted with quiet luxury.
+            Begin curating your wishlist today. Private, quiet, and distraction-free.
           </p>
-          <div className="pt-2 flex justify-center gap-3">
+          <div className="pt-2 flex justify-center">
             <Link
               href="/app"
-              className="h-11 inline-flex items-center gap-2 px-7 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer"
+              className="h-11 inline-flex items-center gap-2 px-7 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer shadow-xs"
             >
-              <span>Open Your Wishlist</span>
-              <ArrowRight size={15} weight="bold" />
+              <span>Open Wishlist</span>
+              <ArrowRight size={14} weight="bold" />
             </Link>
           </div>
         </section>
       </main>
 
-      {/* Architectural Colophon Footer */}
-      <footer className="border-t border-[var(--surface-hover)] py-12 px-6 sm:px-10 text-xs text-[var(--muted)] select-none">
+      {/* Footer */}
+      <footer className="border-t border-[var(--border-subtle)] py-12 px-6 sm:px-10 text-xs text-[var(--muted)] select-none">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -467,8 +326,11 @@ export default function LandingPage() {
             <Link href="/app" className="hover:text-[var(--foreground)] transition cursor-pointer">
               Dashboard
             </Link>
-            <Link href="/app?tab=analytics" className="hover:text-[var(--foreground)] transition cursor-pointer">
-              Analytics
+            <Link href="/privacy" className="hover:text-[var(--foreground)] transition cursor-pointer">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-[var(--foreground)] transition cursor-pointer">
+              Terms
             </Link>
             <a
               href="https://github.com/vinodjangid07"

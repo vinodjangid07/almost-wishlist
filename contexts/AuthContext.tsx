@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import {
   User,
   onAuthStateChanged,
@@ -37,46 +37,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error("Google sign-in error:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const signInWithEmail = async (email: string, pass: string) => {
+  const signInWithEmail = useCallback(async (email: string, pass: string) => {
     await signInWithEmailAndPassword(auth, email, pass);
-  };
+  }, []);
 
-  const signUpWithEmail = async (email: string, pass: string, name: string) => {
+  const signUpWithEmail = useCallback(async (email: string, pass: string, name: string) => {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     if (cred.user && name.trim()) {
       await updateProfile(cred.user, { displayName: name.trim() });
     }
-  };
+  }, []);
 
-  const signInAsGuest = async () => {
+  const signInAsGuest = useCallback(async () => {
     await signInAnonymously(auth);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await signOut(auth);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      user,
+      loading,
+      signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
+      signInAsGuest,
+      logout,
+    }),
+    [user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, signInAsGuest, logout]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        signInWithGoogle,
-        signInWithEmail,
-        signUpWithEmail,
-        signInAsGuest,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

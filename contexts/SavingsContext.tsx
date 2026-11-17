@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { useAuth } from "./AuthContext";
 import { useWishlist } from "./WishlistContext";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
@@ -87,24 +87,27 @@ export const SavingsProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [user, authLoading]);
 
   // Direct savings update / alter
-  const updateSavings = async (newAmount: number) => {
-    const sanitized = Math.max(0, isNaN(newAmount) ? 0 : newAmount);
-    setCurrentSavings(sanitized);
+  const updateSavings = useCallback(
+    async (newAmount: number) => {
+      const sanitized = Math.max(0, isNaN(newAmount) ? 0 : newAmount);
+      setCurrentSavings(sanitized);
 
-    if (user) {
-      try {
-        const userDocRef = doc(db, "users", user.uid);
-        await setDoc(userDocRef, { currentSavings: sanitized, updatedAt: Date.now() }, { merge: true });
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          await setDoc(userDocRef, { currentSavings: sanitized, updatedAt: Date.now() }, { merge: true });
+          localStorage.setItem(`${LOCAL_STORAGE_SAVINGS_KEY}_${user.uid}`, sanitized.toString());
+          return;
+        } catch (err) {
+          console.warn("Firestore setDoc failed, local fallback:", err);
+        }
         localStorage.setItem(`${LOCAL_STORAGE_SAVINGS_KEY}_${user.uid}`, sanitized.toString());
-        return;
-      } catch (err) {
-        console.warn("Firestore setDoc failed, local fallback:", err);
+      } else {
+        localStorage.setItem(`${LOCAL_STORAGE_SAVINGS_KEY}_guest`, sanitized.toString());
       }
-      localStorage.setItem(`${LOCAL_STORAGE_SAVINGS_KEY}_${user.uid}`, sanitized.toString());
-    } else {
-      localStorage.setItem(`${LOCAL_STORAGE_SAVINGS_KEY}_guest`, sanitized.toString());
-    }
-  };
+    },
+    [user]
+  );
 
   // Wishlist cost breakdowns (unpurchased items)
   const { totalWishlistCost, needCost, wantCost, luxuryCost } = useMemo(() => {
@@ -137,25 +140,42 @@ export const SavingsProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return Math.min(100, Math.round((currentSavings / totalWishlistCost) * 100));
   }, [currentSavings, totalWishlistCost]);
 
-  const canAfford = (price: number) => {
-    return currentSavings >= price;
-  };
+  const canAfford = useCallback(
+    (price: number) => {
+      return currentSavings >= price;
+    },
+    [currentSavings]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      currentSavings,
+      totalWishlistCost,
+      needCost,
+      wantCost,
+      luxuryCost,
+      gap,
+      affordabilityPercent,
+      currency,
+      updateSavings,
+      canAfford,
+    }),
+    [
+      currentSavings,
+      totalWishlistCost,
+      needCost,
+      wantCost,
+      luxuryCost,
+      gap,
+      affordabilityPercent,
+      currency,
+      updateSavings,
+      canAfford,
+    ]
+  );
 
   return (
-    <SavingsContext.Provider
-      value={{
-        currentSavings,
-        totalWishlistCost,
-        needCost,
-        wantCost,
-        luxuryCost,
-        gap,
-        affordabilityPercent,
-        currency,
-        updateSavings,
-        canAfford,
-      }}
-    >
+    <SavingsContext.Provider value={contextValue}>
       {children}
     </SavingsContext.Provider>
   );

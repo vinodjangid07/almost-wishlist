@@ -3,16 +3,26 @@ export type PriorityLevel = 'low' | 'medium' | 'high';
 
 export interface ShoppingLink {
   id: string;
-  storeName: string; // e.g. Amazon, Flipkart, Myntra, Official, etc.
+  storeName: string; // e.g. Amazon, Flipkart, Myntra, Official, Booking, etc.
   url: string;
   price?: number;
+}
+
+export interface WishMember {
+  uid: string;
+  displayName: string;
+  email?: string;
+  photoURL?: string;
+  savedAmount: number; // what this individual has contributed/saved towards the goal
+  role: "owner" | "member";
+  joinedAt: number;
 }
 
 export interface WishItem {
   id: string;
   userId: string;
   title: string;
-  description?: string; // "Why I want this"
+  description?: string; // "Why I want this" or notes for friends
   imageUrl?: string;
   storagePath?: string;
   category: string;
@@ -23,7 +33,17 @@ export interface WishItem {
   maxPrice?: number;
   currency: string;
   links: ShoppingLink[];
-  isPurchased: boolean;
+  
+  // Fulfillment status (replaces bought/purchased for both products & experiences)
+  isFulfilled: boolean;
+  isPurchased?: boolean; // backwards-compatible alias
+
+  // Collaborative / Shared Wish fields
+  isShared?: boolean;
+  memberUids?: string[];
+  members?: Record<string, WishMember>;
+  inviteCode?: string;
+
   createdAt: number; // Unix timestamp for robust serialization
   updatedAt: number;
 }

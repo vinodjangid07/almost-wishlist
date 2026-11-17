@@ -1,17 +1,22 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
-import { WishItem, TagType, PriorityLevel } from "@/types";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
+import { WishItem, TagType, PriorityLevel, WishMember } from "@/types";
 import { useAuth } from "./AuthContext";
 import {
   collection,
   query,
   where,
+  or,
+  limit,
+  getDocs,
   onSnapshot,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -38,10 +43,23 @@ interface WishlistContextType {
   addWish: (item: Omit<WishItem, "id" | "userId" | "createdAt" | "updatedAt">) => Promise<string>;
   updateWish: (id: string, updates: Partial<WishItem>) => Promise<void>;
   deleteWish: (id: string) => Promise<void>;
-  togglePurchased: (id: string) => Promise<void>;
+  toggleFulfilled: (id: string) => Promise<void>;
+  togglePurchased: (id: string) => Promise<void>; // Alias for backward compatibility
+  joinSharedWish: (inviteCodeOrUrl: string) => Promise<{ success: boolean; message: string; wishId?: string }>;
+  updateMemberContribution: (wishId: string, amount: number) => Promise<void>;
+  leaveSharedWish: (wishId: string) => Promise<void>;
 }
 
 const LOCAL_STORAGE_KEY = "almost_wishes_backup";
+
+const generateInviteCode = (): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
 
 // Firestore rejects 'undefined' values, so we sanitize objects before writing
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -89,26 +107,33 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  // Load / Sync wishes
+  // Load / Sync wishes in real-time
   useEffect(() => {
-    // If auth is still resolving in background, do NOT assume guest or mark loading as false
     if (authLoading) {
       setLoading(true);
       return;
     }
 
     if (user) {
-      // Save last user id for instantaneous hydration on next page reload
       localStorage.setItem("almost_last_uid", user.uid);
 
       try {
-        const q = query(collection(db, "wishes"), where("userId", "==", user.uid));
+        // Query wishes where user is either the creator (userId) or an invited collaborator (memberUids)
+        const q = query(
+          collection(db, "wishes"),
+          or(
+            where("userId", "==", user.uid),
+            where("memberUids", "array-contains", user.uid)
+          )
+        );
+
         const unsubscribe = onSnapshot(
           q,
           (snapshot) => {
             const items: WishItem[] = [];
             snapshot.forEach((docSnap) => {
               const data = docSnap.data();
+              const fulfilled = Boolean(data.isFulfilled ?? data.isPurchased);
               items.push({
                 id: docSnap.id,
                 userId: data.userId || user.uid,
@@ -124,13 +149,21 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 maxPrice: data.maxPrice !== undefined ? Number(data.maxPrice) : undefined,
                 currency: data.currency || "INR",
                 links: Array.isArray(data.links) ? data.links : [],
-                isPurchased: Boolean(data.isPurchased),
+                isFulfilled: fulfilled,
+                isPurchased: fulfilled, // backward compatibility
+                isShared: Boolean(data.isShared),
+                memberUids: Array.isArray(data.memberUids) ? data.memberUids : [data.userId || user.uid],
+                members: data.members || undefined,
+                inviteCode: data.inviteCode || undefined,
                 createdAt: Number(data.createdAt) || Date.now(),
                 updatedAt: Number(data.updatedAt) || Date.now(),
               });
             });
+
+            // Sort newest first by default in memory
+            items.sort((a, b) => b.createdAt - a.createdAt);
+
             setWishes(items);
-            // Backup locally
             try {
               localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(items));
             } catch {
@@ -140,7 +173,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           },
           (err) => {
             console.warn("Firestore listener fallback to local backup:", err.message);
-            // Fallback to local storage if Firestore rules/network blocked
             const local = localStorage.getItem(`${LOCAL_STORAGE_KEY}_${user.uid}`);
             if (local) {
               try {
@@ -158,7 +190,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setLoading(false);
       }
     } else {
-      // Confirmed genuine guest mode (authLoading is false and user is null)
       localStorage.setItem("almost_last_uid", "guest");
       const local = localStorage.getItem(`${LOCAL_STORAGE_KEY}_guest`);
       if (local) {
@@ -178,100 +209,302 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [user, authLoading]);
 
-  // Save guest changes to local storage
-  const saveGuestWishes = (items: WishItem[]) => {
-    setWishes(items);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_guest`, JSON.stringify(items));
-  };
+  const addWish = useCallback(
+    async (
+      itemData: Omit<WishItem, "id" | "userId" | "createdAt" | "updatedAt">
+    ): Promise<string> => {
+      const now = Date.now();
+      const isShared = Boolean(itemData.isShared);
+      const inviteCode = isShared ? (itemData.inviteCode || generateInviteCode()) : undefined;
 
-  const addWish = async (
-    itemData: Omit<WishItem, "id" | "userId" | "createdAt" | "updatedAt">
-  ): Promise<string> => {
-    const now = Date.now();
-    if (user) {
-      try {
-        const cleanPayload = cleanUndefined({
-          ...itemData,
-          userId: user.uid,
-          createdAt: now,
-          updatedAt: now,
-        });
-        const docRef = await addDoc(collection(db, "wishes"), cleanPayload);
-        return docRef.id;
-      } catch (err) {
-        console.warn("Firestore write failed, falling back to local state:", err);
-        const tempId = `wish_${now}`;
+      const ownerMember: WishMember | undefined = user
+        ? {
+            uid: user.uid,
+            displayName: user.displayName || "Creator",
+            email: user.email || "",
+            photoURL: user.photoURL || "",
+            savedAmount: 0,
+            role: "owner",
+            joinedAt: now,
+          }
+        : undefined;
+
+      const memberUids = user ? [user.uid] : ["guest"];
+      const members: Record<string, WishMember> = user && ownerMember ? { [user.uid]: ownerMember } : {};
+
+      const fulfilled = Boolean(itemData.isFulfilled ?? itemData.isPurchased);
+
+      if (user) {
+        try {
+          const cleanPayload = cleanUndefined({
+            ...itemData,
+            userId: user.uid,
+            isFulfilled: fulfilled,
+            isPurchased: fulfilled,
+            isShared,
+            memberUids,
+            members: isShared ? members : undefined,
+            inviteCode,
+            createdAt: now,
+            updatedAt: now,
+          });
+          const docRef = await addDoc(collection(db, "wishes"), cleanPayload);
+          return docRef.id;
+        } catch (err) {
+          console.warn("Firestore write failed, falling back to local state:", err);
+          const tempId = `wish_${now}`;
+          const newWish: WishItem = {
+            ...itemData,
+            id: tempId,
+            userId: user.uid,
+            isFulfilled: fulfilled,
+            isPurchased: fulfilled,
+            isShared,
+            memberUids,
+            members: isShared ? members : undefined,
+            inviteCode,
+            createdAt: now,
+            updatedAt: now,
+          };
+          setWishes((prev) => {
+            const updated = [newWish, ...prev];
+            localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(updated));
+            return updated;
+          });
+          return tempId;
+        }
+      } else {
+        const tempId = `guest_wish_${now}`;
         const newWish: WishItem = {
           ...itemData,
           id: tempId,
-          userId: user.uid,
+          userId: "guest",
+          isFulfilled: fulfilled,
+          isPurchased: fulfilled,
+          isShared,
+          memberUids,
+          members: isShared ? { guest: { uid: "guest", displayName: "You", savedAmount: 0, role: "owner", joinedAt: now } } : undefined,
+          inviteCode,
           createdAt: now,
           updatedAt: now,
         };
-        const updated = [newWish, ...wishes];
-        setWishes(updated);
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(updated));
+        setWishes((prev) => {
+          const updated = [newWish, ...prev];
+          localStorage.setItem(`${LOCAL_STORAGE_KEY}_guest`, JSON.stringify(updated));
+          return updated;
+        });
         return tempId;
       }
-    } else {
-      const tempId = `guest_wish_${now}`;
-      const newWish: WishItem = {
-        ...itemData,
-        id: tempId,
-        userId: "guest",
-        createdAt: now,
-        updatedAt: now,
+    },
+    [user]
+  );
+
+  const updateWish = useCallback(
+    async (id: string, updates: Partial<WishItem>) => {
+      const now = Date.now();
+      const sanitizedUpdates = { ...updates };
+      if (sanitizedUpdates.isFulfilled !== undefined) {
+        sanitizedUpdates.isPurchased = sanitizedUpdates.isFulfilled;
+      } else if (sanitizedUpdates.isPurchased !== undefined) {
+        sanitizedUpdates.isFulfilled = sanitizedUpdates.isPurchased;
+      }
+
+      // Optimistic update: instantly reflect changes in state and local storage
+      setWishes((prev) => {
+        const updated = prev.map((item) =>
+          item.id === id ? { ...item, ...sanitizedUpdates, updatedAt: now } : item
+        );
+        if (user) {
+          try {
+            localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(updated));
+          } catch {
+            // ignore
+          }
+        } else {
+          localStorage.setItem(`${LOCAL_STORAGE_KEY}_guest`, JSON.stringify(updated));
+        }
+        return updated;
+      });
+
+      // Persist changes to Firestore
+      if (user && !id.startsWith("guest_") && !id.startsWith("sample-")) {
+        try {
+          const docRef = doc(db, "wishes", id);
+          await updateDoc(docRef, cleanUndefined({ ...sanitizedUpdates, updatedAt: now }));
+        } catch (err) {
+          console.warn("Firestore update failed:", err);
+        }
+      }
+    },
+    [user]
+  );
+
+  const deleteWish = useCallback(
+    async (id: string) => {
+      if (user && !id.startsWith("guest_") && !id.startsWith("sample-")) {
+        try {
+          await deleteDoc(doc(db, "wishes", id));
+          return;
+        } catch (err) {
+          console.warn("Firestore delete failed, updating local state:", err);
+        }
+      }
+      setWishes((prev) => {
+        const updated = prev.filter((item) => item.id !== id);
+        if (user) {
+          localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(updated));
+        } else {
+          localStorage.setItem(`${LOCAL_STORAGE_KEY}_guest`, JSON.stringify(updated));
+        }
+        return updated;
+      });
+    },
+    [user]
+  );
+
+  const toggleFulfilled = useCallback(
+    async (id: string) => {
+      const item = wishes.find((w) => w.id === id);
+      if (!item) return;
+      const nextStatus = !Boolean(item.isFulfilled ?? item.isPurchased);
+      await updateWish(id, { isFulfilled: nextStatus, isPurchased: nextStatus });
+    },
+    [wishes, updateWish]
+  );
+
+  // Update an individual member's contribution to a shared wish
+  const updateMemberContribution = useCallback(
+    async (wishId: string, amount: number) => {
+      if (!user) return;
+      const targetWish = wishes.find((w) => w.id === wishId);
+      if (!targetWish) return;
+
+      const existingMembers = targetWish.members || {};
+      const currentMember = existingMembers[user.uid] || {
+        uid: user.uid,
+        displayName: user.displayName || "Member",
+        email: user.email || "",
+        photoURL: user.photoURL || "",
+        savedAmount: 0,
+        role: targetWish.userId === user.uid ? "owner" : "member",
+        joinedAt: Date.now(),
       };
-      saveGuestWishes([newWish, ...wishes]);
-      return tempId;
-    }
-  };
 
-  const updateWish = async (id: string, updates: Partial<WishItem>) => {
-    const now = Date.now();
-    if (user && !id.startsWith("guest_") && !id.startsWith("sample-")) {
-      try {
-        const docRef = doc(db, "wishes", id);
-        await updateDoc(docRef, cleanUndefined({ ...updates, updatedAt: now }));
-        return;
-      } catch (err) {
-        console.warn("Firestore update failed, updating local state:", err);
+      const updatedMembers = {
+        ...existingMembers,
+        [user.uid]: {
+          ...currentMember,
+          savedAmount: Math.max(0, amount),
+        },
+      };
+
+      await updateWish(wishId, { members: updatedMembers });
+    },
+    [user, wishes, updateWish]
+  );
+
+  // Join a shared wish using an invite code (or direct link with code)
+  const joinSharedWish = useCallback(
+    async (
+      codeOrInput: string
+    ): Promise<{ success: boolean; message: string; wishId?: string }> => {
+      if (!user) {
+        return { success: false, message: "Please sign in to join shared wishes." };
       }
-    }
-    const updated = wishes.map((item) =>
-      item.id === id ? { ...item, ...updates, updatedAt: now } : item
-    );
-    if (user) {
-      setWishes(updated);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(updated));
-    } else {
-      saveGuestWishes(updated);
-    }
-  };
 
-  const deleteWish = async (id: string) => {
-    if (user && !id.startsWith("guest_") && !id.startsWith("sample-")) {
-      try {
-        await deleteDoc(doc(db, "wishes", id));
-        return;
-      } catch (err) {
-        console.warn("Firestore delete failed, updating local state:", err);
+      // Extract code if user pasted a full URL
+      let code = codeOrInput.trim().toUpperCase();
+      if (code.includes("/")) {
+        const parts = code.split("/");
+        code = parts[parts.length - 1].trim().toUpperCase();
       }
-    }
-    const updated = wishes.filter((item) => item.id !== id);
-    if (user) {
-      setWishes(updated);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(updated));
-    } else {
-      saveGuestWishes(updated);
-    }
-  };
 
-  const togglePurchased = async (id: string) => {
-    const item = wishes.find((w) => w.id === id);
-    if (!item) return;
-    await updateWish(id, { isPurchased: !item.isPurchased });
-  };
+      if (!code || code.length < 4) {
+        return { success: false, message: "Please enter a valid invite code." };
+      }
+
+      try {
+        const q = query(
+          collection(db, "wishes"),
+          where("inviteCode", "==", code),
+          limit(1)
+        );
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          return { success: false, message: "No wish found with this invite code. Check and try again." };
+        }
+
+        const docSnap = snapshot.docs[0];
+        const wishData = docSnap.data();
+
+        // Check if user is already a member
+        const currentMembers = (wishData.memberUids as string[]) || [];
+        if (currentMembers.includes(user.uid)) {
+          return {
+            success: true,
+            message: `You are already part of "${wishData.title}"!`,
+            wishId: docSnap.id,
+          };
+        }
+
+        const newMember: WishMember = {
+          uid: user.uid,
+          displayName: user.displayName || "Friend",
+          email: user.email || "",
+          photoURL: user.photoURL || "",
+          savedAmount: 0,
+          role: "member",
+          joinedAt: Date.now(),
+        };
+
+        const wishDocRef = doc(db, "wishes", docSnap.id);
+        await updateDoc(wishDocRef, {
+          memberUids: arrayUnion(user.uid),
+          [`members.${user.uid}`]: newMember,
+          updatedAt: Date.now(),
+        });
+
+        return {
+          success: true,
+          message: `Joined "${wishData.title}" successfully!`,
+          wishId: docSnap.id,
+        };
+      } catch (err: unknown) {
+        console.error("Error joining shared wish:", err);
+        return {
+          success: false,
+          message: err instanceof Error ? err.message : "Failed to join shared wish.",
+        };
+      }
+    },
+    [user]
+  );
+
+  // Leave a shared wish
+  const leaveSharedWish = useCallback(
+    async (wishId: string) => {
+      if (!user) return;
+      const targetWish = wishes.find((w) => w.id === wishId);
+      if (!targetWish) return;
+
+      if (targetWish.userId === user.uid) {
+        throw new Error("As the creator, you cannot leave this wish. You can delete it instead.");
+      }
+
+      try {
+        const wishDocRef = doc(db, "wishes", wishId);
+        // Remove from memberUids
+        await updateDoc(wishDocRef, {
+          memberUids: arrayRemove(user.uid),
+          updatedAt: Date.now(),
+        });
+      } catch (err) {
+        console.error("Error leaving shared wish:", err);
+      }
+    },
+    [user, wishes]
+  );
 
   // Derive unique categories from active wishes
   const categories = useMemo(() => {
@@ -286,13 +519,13 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Filtered & Sorted wishes
   const filteredWishes = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return wishes
       .filter((item) => {
         // Search query (title, description, category, store)
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
+        if (q) {
           const matchTitle = item.title.toLowerCase().includes(q);
-          const matchDesc = item.description?.toLowerCase().includes(q);
+          const matchDesc = item.description?.toLowerCase().includes(q) || false;
           const matchCat = item.category.toLowerCase().includes(q);
           const matchStore = item.links.some((l) => l.storeName.toLowerCase().includes(q));
           if (!matchTitle && !matchDesc && !matchCat && !matchStore) return false;
@@ -322,31 +555,56 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
   }, [wishes, searchQuery, tagFilter, categoryFilter, priorityFilter, sortBy]);
 
+  const contextValue = useMemo(
+    () => ({
+      wishes,
+      loading,
+      searchQuery,
+      setSearchQuery,
+      tagFilter,
+      setTagFilter,
+      categoryFilter,
+      setCategoryFilter,
+      priorityFilter,
+      setPriorityFilter,
+      affordabilityFilter,
+      setAffordabilityFilter,
+      sortBy,
+      setSortBy,
+      categories,
+      filteredWishes,
+      addWish,
+      updateWish,
+      deleteWish,
+      toggleFulfilled,
+      togglePurchased: toggleFulfilled, // alias for backward compatibility
+      joinSharedWish,
+      updateMemberContribution,
+      leaveSharedWish,
+    }),
+    [
+      wishes,
+      loading,
+      searchQuery,
+      tagFilter,
+      categoryFilter,
+      priorityFilter,
+      affordabilityFilter,
+      sortBy,
+      categories,
+      filteredWishes,
+      addWish,
+      updateWish,
+      deleteWish,
+      toggleFulfilled,
+      joinSharedWish,
+      updateMemberContribution,
+      leaveSharedWish,
+    ]
+  );
+
   return (
-    <WishlistContext.Provider
-      value={{
-        wishes,
-        loading,
-        searchQuery,
-        setSearchQuery,
-        tagFilter,
-        setTagFilter,
-        categoryFilter,
-        setCategoryFilter,
-        priorityFilter,
-        setPriorityFilter,
-        affordabilityFilter,
-        setAffordabilityFilter,
-        sortBy,
-        setSortBy,
-        categories,
-        filteredWishes,
-        addWish,
-        updateWish,
-        deleteWish,
-        togglePurchased,
-      }}
-    >
+    <WishlistContext.Provider value={contextValue}>
       {children}
     </WishlistContext.Provider>
   );

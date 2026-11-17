@@ -7,10 +7,9 @@ import { X, Lock, Envelope, User } from "@phosphor-icons/react";
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSeedShowcase?: () => Promise<void>;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSeedShowcase }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { user, signInWithGoogle, signInWithEmail, signUpWithEmail, logout } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
@@ -18,7 +17,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSeedSho
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
   if (!isOpen) return null;
 
@@ -92,25 +90,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSeedSho
               <p className="font-semibold text-[var(--foreground)] mt-0.5">{user.email || "Guest Session"}</p>
               {user.displayName && <p className="text-[var(--muted)] mt-0.5">{user.displayName}</p>}
             </div>
-
-            {onSeedShowcase && (
-              <button
-                type="button"
-                disabled={seeding}
-                onClick={async () => {
-                  setSeeding(true);
-                  try {
-                    await onSeedShowcase();
-                    onClose();
-                  } finally {
-                    setSeeding(false);
-                  }
-                }}
-                className="w-full h-10 px-4 rounded-xl text-xs font-semibold bg-[var(--surface-hover)] hover:bg-[var(--surface-active)] text-[var(--foreground)] transition cursor-pointer flex items-center justify-center gap-2"
-              >
-                {seeding ? "Populating wishes..." : "Seed 6 Showcase Products"}
-              </button>
-            )}
 
             <button
               onClick={async () => {

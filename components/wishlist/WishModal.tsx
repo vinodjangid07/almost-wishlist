@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { WishItem, TagType, PriorityLevel, ShoppingLink } from "@/types";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
-import { X, UploadSimple, Plus, Trash, CurrencyInr } from "@phosphor-icons/react";
+import { X, UploadSimple, Plus, Trash, CurrencyInr, UsersThree } from "@phosphor-icons/react";
 
 interface WishModalProps {
   isOpen: boolean;
@@ -12,15 +12,17 @@ interface WishModalProps {
   wishToEdit?: WishItem | null;
 }
 
-const COMMON_STORES = ["Amazon", "Flipkart", "Myntra", "Apple", "Nike", "Other"];
+const COMMON_STORES = ["Amazon", "Flipkart", "Myntra", "Apple", "Nike", "Booking.com", "Airbnb", "Other"];
 const DEFAULT_CATEGORIES = [
+  "Experiences & Travel",
+  "Travel & Outings",
   "Tech & Electronics",
   "Clothing & Shoes",
   "Home & Living",
   "Books & Learning",
   "Fitness & Sports",
-  "Travel & Outings",
   "Gaming",
+  "Other",
 ];
 
 export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdit }) => {
@@ -29,7 +31,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Tech & Electronics");
+  const [category, setCategory] = useState("Experiences & Travel");
   const [customCategory, setCustomCategory] = useState("");
   const [tag, setTag] = useState<TagType>("want");
   const [priority, setPriority] = useState<PriorityLevel>("medium");
@@ -37,6 +39,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
   const [showPriceRange, setShowPriceRange] = useState(false);
+  const [isShared, setIsShared] = useState(false);
 
   // Links repeater
   const [links, setLinks] = useState<ShoppingLink[]>([
@@ -46,6 +49,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
   // Image upload & preview
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [imageError, setImageError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -54,6 +58,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
       setDescription(wishToEdit.description || "");
       if (DEFAULT_CATEGORIES.includes(wishToEdit.category)) {
         setCategory(wishToEdit.category);
+        setCustomCategory("");
       } else {
         setCategory("Other");
         setCustomCategory(wishToEdit.category);
@@ -64,6 +69,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
       setMinPrice(wishToEdit.minPrice ? wishToEdit.minPrice.toString() : "");
       setMaxPrice(wishToEdit.maxPrice ? wishToEdit.maxPrice.toString() : "");
       setShowPriceRange(!!(wishToEdit.minPrice || wishToEdit.maxPrice));
+      setIsShared(Boolean(wishToEdit.isShared));
       setLinks(
         wishToEdit.links && wishToEdit.links.length > 0
           ? wishToEdit.links
@@ -75,7 +81,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
       // Reset
       setTitle("");
       setDescription("");
-      setCategory("Tech & Electronics");
+      setCategory("Experiences & Travel");
       setCustomCategory("");
       setTag("want");
       setPriority("medium");
@@ -83,9 +89,11 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
       setMinPrice("");
       setMaxPrice("");
       setShowPriceRange(false);
+      setIsShared(false);
       setLinks([{ id: "link-1", storeName: "Amazon", url: "", price: undefined }]);
       setImagePreview("");
       setImageFile(null);
+      setImageError(null);
     }
   }, [wishToEdit, isOpen]);
 
@@ -113,8 +121,13 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError(null);
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        setImageError("Image exceeds 5MB limit. Please choose a smaller file.");
+        return;
+      }
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
@@ -176,6 +189,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
           maxPrice: parsedMax,
           imageUrl: finalImageUrl || undefined,
           links: validLinks,
+          isShared,
         });
       } else {
         await addWish({
@@ -190,7 +204,9 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
           currency: currency || "₹",
           imageUrl: finalImageUrl || undefined,
           links: validLinks,
+          isFulfilled: false,
           isPurchased: false,
+          isShared,
         });
       }
 
@@ -218,27 +234,25 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
           <X size={16} />
         </button>
 
-        <span className="text-xs font-semibold text-[var(--primary)] block mb-1">
-          {wishToEdit ? "Edit Item" : "New Wish"}
-        </span>
-        <h2 className="text-xl font-bold text-[var(--foreground)] mb-5">
-          {wishToEdit ? "Edit Wish Details" : "Add to Wishlist"}
+        {/* Single Confident Headline (No duplicate "Edit Item" eyebrow) */}
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--foreground)] mb-5">
+          {wishToEdit ? "Edit Wish" : "New Wish"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image & Preview */}
+          {/* Item Photo & Upload */}
           <div>
             <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
-              Item Photo
+              Photo
             </label>
-            <div className="flex flex-col sm:flex-row gap-3 items-center">
-              <div className="w-full sm:w-28 h-20 rounded-2xl bg-[var(--background)] overflow-hidden flex items-center justify-center relative shrink-0">
+            <div className="flex gap-3 items-center">
+              <div className="w-20 h-20 rounded-2xl bg-[var(--surface-raised)] overflow-hidden flex items-center justify-center relative shrink-0 group">
                 {imagePreview ? (
                   <>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imagePreview}
-                      alt="Wish preview"
+                      alt="Preview"
                       className="w-full h-full object-cover"
                     />
                     <button
@@ -247,20 +261,21 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
                         setImageFile(null);
                         setImagePreview("");
                       }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-md bg-black/70 text-white hover:bg-black transition cursor-pointer"
+                      className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition cursor-pointer"
+                      title="Remove image"
                     >
-                      <Trash size={12} />
+                      <Trash size={15} />
                     </button>
                   </>
                 ) : (
-                  <span className="text-xs text-[var(--muted)] font-medium">No photo</span>
+                  <span className="text-xs text-[var(--muted)] font-medium">None</span>
                 )}
               </div>
 
               <div className="flex-1 w-full space-y-2">
-                <label className="h-9 flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--background)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--foreground)] cursor-pointer transition">
+                <label className="h-9 flex items-center justify-center gap-2 w-full rounded-xl bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--foreground)] cursor-pointer transition">
                   <UploadSimple size={15} />
-                  <span>Choose Image File</span>
+                  <span>{imagePreview ? "Change Photo File" : "Upload Photo File"}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -284,85 +299,77 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
                     setImageFile(null);
                     setImagePreview(e.target.value);
                   }}
-                  className="h-9 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
+                  className="h-9 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition"
                 />
+
+                {imageError && (
+                  <p className="text-[11px] text-[var(--danger)] font-medium pt-0.5">
+                    {imageError}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Title */}
+          {/* Item Name */}
           <div>
             <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
-              Item Name *
+              Name *
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. Sony Headphones, Winter Jacket, Coffee Maker"
+              placeholder="e.g. Rimowa Classic Cabin Suitcase, Trip to Japan"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="h-10 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3.5 text-xs sm:text-sm font-medium text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
+              className="h-10 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3.5 text-xs sm:text-sm font-semibold text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition"
             />
           </div>
 
-          {/* Note */}
+          {/* Classification (Spacious dedicated row) */}
           <div>
             <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
-              Note
+              Classification
             </label>
-            <textarea
-              rows={2}
-              placeholder="Write why you want this, target date, or notes..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition resize-none"
-            />
+            <div className="h-10 p-1 bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded-xl flex items-center gap-1.5 max-w-sm">
+              <button
+                type="button"
+                onClick={() => setTag("need")}
+                className={`h-8 flex-1 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
+                  tag === "need"
+                    ? "bg-[var(--foreground)] text-[var(--background)] shadow-xs"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                Need
+              </button>
+              <button
+                type="button"
+                onClick={() => setTag("want")}
+                className={`h-8 flex-1 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
+                  tag === "want"
+                    ? "bg-[var(--foreground)] text-[var(--background)] shadow-xs"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                Want
+              </button>
+              <button
+                type="button"
+                onClick={() => setTag("luxury")}
+                className={`h-8 flex-1 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
+                  tag === "luxury"
+                    ? "bg-[var(--foreground)] text-[var(--background)] shadow-xs"
+                    : "text-[var(--muted)] hover:text-[var(--foreground)]"
+                }`}
+              >
+                Luxury
+              </button>
+            </div>
           </div>
 
-          {/* Tag, Priority & Category (Exact unified h-10 row controls) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Tag */}
-            <div>
-              <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
-                Classification
-              </label>
-              <div className="h-10 p-1 bg-[var(--background)] rounded-xl flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setTag("need")}
-                  className={`h-8 flex-1 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-                    tag === "need"
-                      ? "bg-[var(--surface)] text-[var(--foreground)]"
-                      : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                  }`}
-                >
-                  Need
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTag("want")}
-                  className={`h-8 flex-1 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-                    tag === "want"
-                      ? "bg-[var(--surface)] text-[var(--foreground)]"
-                      : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                  }`}
-                >
-                  Want
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTag("luxury")}
-                  className={`h-8 flex-1 rounded-lg text-xs font-semibold flex items-center justify-center transition cursor-pointer ${
-                    tag === "luxury"
-                      ? "bg-[var(--surface)] text-[var(--primary)] font-bold"
-                      : "text-[var(--muted)] hover:text-[var(--foreground)]"
-                  }`}
-                >
-                  Luxury
-                </button>
-              </div>
-            </div>
-
+          {/* Priority & Category (Clean 2-column grid) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Priority */}
             <div>
               <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
@@ -371,7 +378,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as PriorityLevel)}
-                className="h-10 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer font-medium"
+                className="h-10 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer font-medium transition"
               >
                 <option value="high">High</option>
                 <option value="medium">Medium</option>
@@ -387,18 +394,18 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="h-10 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer font-medium"
+                className="h-10 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer font-medium transition"
               >
                 {DEFAULT_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>
                 ))}
-                <option value="Other">Custom...</option>
               </select>
             </div>
           </div>
 
+          {/* Custom Category Input if "Other" is selected */}
           {category === "Other" && (
             <div>
               <input
@@ -406,12 +413,12 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
                 placeholder="Enter custom category name..."
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
-                className="h-10 w-full bg-[var(--background)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none"
+                className="h-10 w-full bg-[var(--surface-raised)] focus:bg-[var(--background)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none transition"
               />
             </div>
           )}
 
-          {/* Pricing (Flat surface, zero card-in-card) */}
+          {/* Pricing (Without browser spin-buttons) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-medium text-[var(--muted)]">
@@ -420,16 +427,16 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
               <button
                 type="button"
                 onClick={() => setShowPriceRange(!showPriceRange)}
-                className="text-xs text-[var(--primary)] hover:opacity-80 transition font-medium cursor-pointer"
+                className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition font-medium cursor-pointer"
               >
-                {showPriceRange ? "— Single price" : "+ Add min/max range"}
+                {showPriceRange ? "Single price only" : "+ Add min/max range"}
               </button>
             </div>
 
             <div className="relative">
               <CurrencyInr
                 size={16}
-                className="text-[var(--muted)] absolute left-3 top-1/2 -translate-y-1/2"
+                className="text-[var(--muted)] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
               />
               <input
                 type="number"
@@ -439,7 +446,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
                 placeholder="e.g. 5000"
                 value={estimatedPrice}
                 onChange={(e) => setEstimatedPrice(e.target.value)}
-                className="h-10 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl pl-8 pr-3.5 text-sm font-semibold tabular-nums text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
+                className="h-10 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl pl-8 pr-3.5 text-sm font-semibold tabular-nums text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
 
@@ -455,7 +462,7 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
                     placeholder="Min"
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    className="h-10 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
+                    className="h-10 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs tabular-nums text-[var(--foreground)] focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div>
@@ -468,14 +475,69 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
                     placeholder="Max"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    className="h-10 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
+                    className="h-10 w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs tabular-nums text-[var(--foreground)] focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Multi-Store Comparison Links (Flat rows with unified h-10 controls) */}
+          {/* Note */}
+          <div>
+            <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">
+              Note
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Why you want this, target date, or notes..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition resize-none"
+            />
+          </div>
+
+          {/* Collaborative / Shared Wish Toggle */}
+          <div
+            onClick={() => setIsShared(!isShared)}
+            className={`p-3.5 rounded-2xl cursor-pointer transition select-none flex items-center justify-between gap-3 ${
+              isShared
+                ? "bg-[var(--surface-raised)]"
+                : "bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)]"
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition ${
+                  isShared
+                    ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+                    : "bg-[var(--surface)] text-[var(--muted)]"
+                }`}
+              >
+                <UsersThree size={17} />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-[var(--foreground)] block">
+                  Collaborative Wish
+                </span>
+                <span className="text-[11px] text-[var(--muted)] block">
+                  Pool savings and track with friends (travel, trips, group gifts)
+                </span>
+              </div>
+            </div>
+            <div
+              className={`w-9 h-5 rounded-full transition-colors relative flex items-center p-0.5 shrink-0 ${
+                isShared ? "bg-[var(--primary)]" : "bg-[var(--muted)]/30"
+              }`}
+            >
+              <div
+                className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                  isShared ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </div>
+          </div>
+
+          {/* Store Comparison Links */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-medium text-[var(--muted)]">
@@ -484,74 +546,80 @@ export const WishModal: React.FC<WishModalProps> = ({ isOpen, onClose, wishToEdi
               <button
                 type="button"
                 onClick={handleAddLink}
-                className="text-xs text-[var(--primary)] hover:opacity-80 transition inline-flex items-center gap-1 font-medium cursor-pointer"
+                className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition inline-flex items-center gap-1 font-medium cursor-pointer"
               >
                 <Plus size={13} />
                 <span>Add Store</span>
               </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3 sm:space-y-2">
               {links.map((link, idx) => (
                 <div
                   key={link.id || idx}
-                  className="flex flex-col sm:flex-row gap-2 items-center"
+                  className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-2 p-2.5 sm:p-0 rounded-2xl bg-[var(--background)] sm:bg-transparent border border-[var(--border-subtle)] sm:border-0"
                 >
-                  <select
-                    value={link.storeName}
-                    onChange={(e) =>
-                      handleUpdateLink(link.id, { storeName: e.target.value })
-                    }
-                    className="h-10 w-full sm:w-28 bg-[var(--background)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium"
-                  >
-                    {COMMON_STORES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+                    <select
+                      value={link.storeName}
+                      onChange={(e) =>
+                        handleUpdateLink(link.id, { storeName: e.target.value })
+                      }
+                      className="h-10 w-full sm:w-28 bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none cursor-pointer transition font-medium shrink-0"
+                    >
+                      {COMMON_STORES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
 
-                  <input
-                    type="url"
-                    placeholder="https://store.com/item..."
-                    value={link.url}
-                    onChange={(e) =>
-                      handleUpdateLink(link.id, { url: e.target.value })
-                    }
-                    className="h-10 flex-1 w-full bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
-                  />
+                    <input
+                      type="number"
+                      placeholder="Price ₹"
+                      value={link.price !== undefined ? link.price : ""}
+                      onChange={(e) =>
+                        handleUpdateLink(link.id, {
+                          price: e.target.value ? parseFloat(e.target.value) : undefined,
+                        })
+                      }
+                      className="h-10 w-full sm:w-24 bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs tabular-nums text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
 
-                  <input
-                    type="number"
-                    placeholder="Price ₹"
-                    value={link.price !== undefined ? link.price : ""}
-                    onChange={(e) =>
-                      handleUpdateLink(link.id, {
-                        price: e.target.value ? parseFloat(e.target.value) : undefined,
-                      })
-                    }
-                    className="h-10 w-full sm:w-24 bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs tabular-nums text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--primary)] transition"
-                  />
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      type="url"
+                      placeholder="https://store.com/item..."
+                      value={link.url}
+                      onChange={(e) =>
+                        handleUpdateLink(link.id, { url: e.target.value })
+                      }
+                      className="h-10 w-full flex-1 bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] rounded-xl px-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition"
+                    />
 
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveLink(link.id)}
-                    className="h-10 w-10 flex items-center justify-center text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--background)] rounded-xl transition cursor-pointer shrink-0"
-                    title="Remove link"
-                  >
-                    <Trash size={15} />
-                  </button>
+                    {links.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLink(link.id)}
+                        className="h-10 w-10 flex items-center justify-center text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--surface-raised)] rounded-xl transition cursor-pointer shrink-0"
+                        title="Remove link"
+                      >
+                        <Trash size={15} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Action Row */}
           <div className="flex items-center justify-end gap-2.5 pt-3">
             <button
               type="button"
               onClick={onClose}
-              className="h-10 px-5 rounded-xl text-xs font-semibold bg-[var(--background)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer"
+              className="h-10 px-5 rounded-xl text-xs font-semibold bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer"
             >
               Cancel
             </button>
