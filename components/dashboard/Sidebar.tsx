@@ -2,6 +2,7 @@
 
 import React, { useCallback, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -46,6 +47,9 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
   const { user } = useAuth();
   const { resolvedTheme, toggleTheme } = useTheme();
   const [avatarError, setAvatarError] = useState(false);
+
+  const appIconSrc =
+    resolvedTheme === "dark" ? "/dark-app-icon.webp" : "/light-app-icon.webp";
 
   const userInitial = user?.displayName
     ? user.displayName.charAt(0).toUpperCase()
@@ -129,24 +133,58 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
               isCollapsed ? "justify-center px-2" : "justify-between px-4"
             }`}
           >
-            {!isCollapsed && (
-              <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-                <span className="text-xl font-bold tracking-tight text-[var(--foreground)] group-hover:text-[var(--primary)] transition">
-                  almost
-                </span>
-                <span className="text-[11px] text-[var(--muted)] font-medium">
-                  wishlist
-                </span>
-              </Link>
-            )}
+            {!isCollapsed ? (
+              <>
+                {/* Fully open sidebar: app icon redirects to home */}
+                <Link
+                  href="/"
+                  title="Return to Home"
+                  className="p-1 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center"
+                >
+                  <Image
+                    src={appIconSrc}
+                    alt="almost"
+                    width={28}
+                    height={28}
+                    priority
+                    className="w-7 h-7 rounded-lg object-contain"
+                  />
+                </Link>
 
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-            >
-              <SidebarSimple size={18} weight="regular" />
-            </button>
+                {/* Collapsible toggle button */}
+                <button
+                  onClick={() => setIsCollapsed(true)}
+                  title="Collapse sidebar"
+                  className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                >
+                  <SidebarSimple size={18} weight="regular" />
+                </button>
+              </>
+            ) : (
+              /* Collapsed sidebar: shows app icon, on hover reveals collapse/expand icon */
+              <button
+                onClick={() => setIsCollapsed(false)}
+                title="Expand sidebar"
+                className="relative group w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
+              >
+                {/* Default: App icon (fades out on hover) */}
+                <div className="flex items-center justify-center transition-opacity duration-150 group-hover:opacity-0">
+                  <Image
+                    src={appIconSrc}
+                    alt="almost"
+                    width={28}
+                    height={28}
+                    priority
+                    className="w-7 h-7 rounded-lg object-contain"
+                  />
+                </div>
+
+                {/* Hover state: Reveal sidebar expand icon */}
+                <div className="absolute inset-0 flex items-center justify-center text-[var(--foreground)] opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
+                  <SidebarSimple size={18} weight="regular" />
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Navigation & Actions Area */}
@@ -207,13 +245,19 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
             <div>
               {/* Header with Brand and Close - Exact h-16 with border-b */}
               <div className="h-16 px-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={onCloseMobile}>
-                  <span className="text-xl font-bold tracking-tight text-[var(--foreground)]">
-                    almost
-                  </span>
-                  <span className="text-[11px] text-[var(--muted)] font-medium">
-                    wishlist
-                  </span>
+                <Link
+                  href="/"
+                  title="Return to Home"
+                  className="p-1 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center"
+                  onClick={onCloseMobile}
+                >
+                  <Image
+                    src={appIconSrc}
+                    alt="almost"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 rounded-lg object-contain"
+                  />
                 </Link>
 
                 <button

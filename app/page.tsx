@@ -2,7 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { SmoothScroll } from "@/components/landing/SmoothScroll";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   ArrowRight,
   ShieldCheck,
@@ -11,6 +13,12 @@ import {
 } from "@phosphor-icons/react";
 
 export default function LandingPage() {
+  const { resolvedTheme } = useTheme();
+  const wordmarkLogo =
+    resolvedTheme === "dark"
+      ? "/light-wordmark-logo.webp"
+      : "/dark-wordmark-logo.webp";
+
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--foreground)] selection:text-[var(--background)] font-sans antialiased overflow-x-hidden">
       <SmoothScroll />
@@ -18,13 +26,15 @@ export default function LandingPage() {
       {/* Clean Navigation Bar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/85 backdrop-blur-md select-none transition-all duration-300 border-b border-[var(--border-subtle)]">
         <div className="max-w-7xl mx-auto px-6 sm:px-10 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-baseline gap-2.5 group cursor-pointer">
-            <span className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--foreground)] group-hover:text-[var(--primary)] transition">
-              almost
-            </span>
-            <span className="text-[11px] text-[var(--muted)] font-medium tracking-wide hidden sm:inline">
-              almost yours
-            </span>
+          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer" title="almost">
+            <Image
+              src={wordmarkLogo}
+              alt="almost"
+              width={120}
+              height={28}
+              priority
+              className="h-6 sm:h-7 w-auto object-contain"
+            />
           </Link>
 
           <div>
@@ -311,11 +321,17 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[var(--border-subtle)] py-12 px-6 sm:px-10 text-xs text-[var(--muted)] select-none">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[var(--foreground)] tracking-tight">almost</span>
-              <span>•</span>
-              <span className="font-medium">almost yours</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2.5">
+              <Image
+                src={wordmarkLogo}
+                alt="almost"
+                width={88}
+                height={20}
+                className="h-5 w-auto object-contain"
+              />
+              <span className="text-[var(--muted-light)]">•</span>
+              <span className="font-medium text-xs text-[var(--muted)]">almost yours</span>
             </div>
             <p className="text-[11px] text-[var(--muted)]">
               The intentional wishlist manager for quiet luxury and patient ownership.
