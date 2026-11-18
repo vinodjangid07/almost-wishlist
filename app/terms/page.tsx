@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
-  title: "Terms of Service | almost",
+  title: "Terms of Service",
   description: "Terms of Service and legal standards for almost.",
 };
 

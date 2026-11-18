@@ -13,10 +13,69 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://almost.vinodjangid.site";
+
 export const metadata: Metadata = {
-  title: "almost • almost yours | Wishlist Manager",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "almost • Intentional Wishlist Manager",
+    template: "%s | almost",
+  },
   description:
-    "A clean, simple wishlist manager to save things you want, track your savings, and know when you can afford them.",
+    "An intentional wishlist manager designed for quiet luxury and mindful ownership. Classify desires, budget against live savings, and pool contributions for things worth waiting for.",
+  keywords: [
+    "almost",
+    "almost wishlist",
+    "wishlist manager",
+    "intentional ownership",
+    "mindful budgeting",
+    "savings tracker",
+    "collaborative wishlist",
+    "quiet luxury",
+  ],
+  authors: [{ name: "Vinod Jangid", url: "https://vinodjangid.site" }],
+  creator: "Vinod Jangid",
+  publisher: "Vinod Jangid",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "almost",
+    title: "almost • Intentional Wishlist Manager",
+    description:
+      "An intentional wishlist manager designed for quiet luxury and mindful ownership. Classify desires, budget against live savings, and pool contributions for things worth waiting for.",
+    images: [
+      {
+        url: "/preview/almost-preview.webp",
+        width: 1200,
+        height: 630,
+        alt: "almost — Intentional Wishlist Manager",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "almost • Intentional Wishlist Manager",
+    description:
+      "An intentional wishlist manager designed for quiet luxury and mindful ownership. Classify desires, budget against live savings, and pool contributions for things worth waiting for.",
+    creator: "@vinodjangid",
+    images: ["/preview/almost-preview.webp"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/dark-app-icon.webp",
+  },
 };
 
 export default function RootLayout({

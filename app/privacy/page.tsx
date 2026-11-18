@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata = {
-  title: "Privacy Policy | almost",
+  title: "Privacy Policy",
   description: "Privacy Policy and data governance standards for almost.",
 };
 
