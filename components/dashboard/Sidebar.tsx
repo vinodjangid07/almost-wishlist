@@ -145,15 +145,15 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 <Link
                   href="/"
                   title="Return to Home"
-                  className="w-10 h-10 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center group"
+                  className="w-10 h-10 flex items-center justify-center cursor-pointer select-none shrink-0"
                 >
                   <Image
                     src={appIconSrc}
                     alt="almost"
-                    width={36}
-                    height={36}
+                    width={40}
+                    height={40}
                     priority
-                    className="w-8.5 h-8.5 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105"
+                    className="w-10 h-10 rounded-xl border border-[var(--border-subtle)] object-contain transition duration-150 hover:brightness-90 shrink-0"
                   />
                 </Link>
 
@@ -178,10 +178,10 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                   <Image
                     src={appIconSrc}
                     alt="almost"
-                    width={36}
-                    height={36}
+                    width={40}
+                    height={40}
                     priority
-                    className="w-8.5 h-8.5 rounded-xl object-contain"
+                    className="w-10 h-10 rounded-xl border border-[var(--border-subtle)] object-contain"
                   />
                 </div>
 
@@ -212,21 +212,17 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           </div>
         </div>
 
-        {/* Bottom Section: Profile Dropdown & Total Savings Status */}
-        <div className={`space-y-2.5 ${isCollapsed ? "p-2" : "p-4"}`}>
-          <ProfileDropdown
-            collapsed={isCollapsed}
-            className={
-              isCollapsed
-                ? "w-10 h-10 p-0 justify-center mx-auto"
-                : "w-full justify-between h-10"
-            }
-            align="left"
-            direction="up"
-            onOpenAuthModal={onOpenAuthModal}
-          />
-
-          {!isCollapsed && (
+        {/* Bottom Section: Total Savings Status (Profile is strictly in Header on PC) */}
+        <div className={isCollapsed ? "p-2" : "p-4"}>
+          {isCollapsed ? (
+            <button
+              onClick={handleEditSavings}
+              className="w-10 h-10 mx-auto rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition flex items-center justify-center text-xs font-bold text-[var(--foreground)] cursor-pointer"
+              title={`Total savings: ${currency}${currentSavings.toLocaleString("en-IN")}`}
+            >
+              {currency}
+            </button>
+          ) : (
             <div
               onClick={handleEditSavings}
               className="p-3 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] cursor-pointer hover:bg-[var(--surface-hover)] transition group"
@@ -266,15 +262,15 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 <Link
                   href="/"
                   title="Return to Home"
-                  className="w-10 h-10 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center group"
+                  className="w-10 h-10 flex items-center justify-center cursor-pointer select-none"
                   onClick={onCloseMobile}
                 >
                   <Image
                     src={appIconSrc}
                     alt="almost"
-                    width={36}
-                    height={36}
-                    className="w-8.5 h-8.5 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-xl border border-[var(--border-subtle)] object-contain transition duration-150 hover:brightness-90"
                   />
                 </Link>
 
@@ -288,11 +284,10 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
               </div>
 
               <div className="p-5 space-y-4">
-                {/* Mobile User Profile Dropdown */}
+                {/* Mobile User Profile Button (Direct link to /profile, no dropdown) */}
                 <ProfileDropdown
-                  className="w-full justify-between h-11"
-                  align="left"
-                  direction="down"
+                  className="w-full justify-start h-11"
+                  showDropdown={false}
                   onOpenAuthModal={onOpenAuthModal}
                   onAction={onCloseMobile}
                 />

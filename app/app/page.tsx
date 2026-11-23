@@ -145,10 +145,13 @@ export default function WishlistApp() {
 
           {/* Right: Controls (Theme, Avatar, Join Wish, Add Wish) */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Theme Toggle & Profile Dropdown (Shared Components) */}
+            {/* Theme Toggle & Profile Button (Direct link to /profile, no dropdown) */}
             <div className="hidden md:flex items-center gap-2 sm:gap-2.5">
               <ThemeToggle />
-              <ProfileDropdown onOpenAuthModal={() => setIsAuthModalOpen(true)} />
+              <ProfileDropdown
+                showDropdown={false}
+                onOpenAuthModal={() => setIsAuthModalOpen(true)}
+              />
             </div>
 
             {/* Join Shared Wish CTA (Desktop only - mobile accessible inside drawer) */}

@@ -13,6 +13,7 @@ interface ProfileDropdownProps {
   direction?: "up" | "down";
   onAction?: () => void;
   collapsed?: boolean;
+  showDropdown?: boolean;
 }
 
 export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
@@ -22,6 +23,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   direction = "down",
   onAction,
   collapsed = false,
+  showDropdown = true,
 }) => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -94,51 +96,87 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
 
   return (
     <div className="relative" ref={containerRef}>
-      {/* Profile Button - Matches Dashboard Style Exactly */}
-      <button
-        onClick={handleTriggerClick}
-        className={`h-10 flex items-center gap-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
-        title={user ? "Account / Profile" : "Sign In to Account"}
-        aria-label={user ? "Account menu" : "Sign In"}
-      >
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-5 h-5 rounded-full bg-[var(--surface-raised)] text-[var(--foreground)] flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden">
-            {user?.photoURL && !avatarError ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.photoURL}
-                alt=""
-                referrerPolicy="no-referrer"
-                onError={() => setAvatarError(true)}
-                className="w-full h-full object-cover"
-              />
-            ) : user ? (
-              <span>{userInitial}</span>
-            ) : (
-              <User size={12} weight="bold" />
+      {/* If showDropdown is false and user is logged in, link directly to /profile without dropdown or chevron */}
+      {!showDropdown && user ? (
+        <Link
+          href="/profile"
+          onClick={() => {
+            if (onAction) onAction();
+          }}
+          className={`h-10 flex items-center gap-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
+          title="Account / Profile"
+          aria-label="Account profile"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-5 h-5 rounded-full bg-[var(--surface-raised)] text-[var(--foreground)] flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden">
+              {user.photoURL && !avatarError ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.photoURL}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{userInitial}</span>
+              )}
+            </div>
+
+            {!collapsed && (
+              <span className="text-xs font-medium text-[var(--foreground)] truncate">
+                {user.displayName || user.email?.split("@")[0]}
+              </span>
+            )}
+          </div>
+        </Link>
+      ) : (
+        /* Standard Profile Button with dropdown trigger */
+        <button
+          onClick={handleTriggerClick}
+          className={`h-10 flex items-center gap-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
+          title={user ? "Account / Profile" : "Sign In to Account"}
+          aria-label={user ? "Account menu" : "Sign In"}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-5 h-5 rounded-full bg-[var(--surface-raised)] text-[var(--foreground)] flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden">
+              {user?.photoURL && !avatarError ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.photoURL}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : user ? (
+                <span>{userInitial}</span>
+              ) : (
+                <User size={12} weight="bold" />
+              )}
+            </div>
+
+            {!collapsed && (
+              <span className="text-xs font-medium text-[var(--foreground)] truncate">
+                {user ? user.displayName || user.email?.split("@")[0] : "Sign In"}
+              </span>
             )}
           </div>
 
-          {!collapsed && (
-            <span className="text-xs font-medium text-[var(--foreground)] truncate">
-              {user ? user.displayName || user.email?.split("@")[0] : "Sign In"}
-            </span>
+          {showDropdown && user && !collapsed && (
+            <CaretDown
+              size={11}
+              weight="bold"
+              className={`text-[var(--muted)] transition-transform duration-200 shrink-0 ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
           )}
-        </div>
+        </button>
+      )}
 
-        {user && !collapsed && (
-          <CaretDown
-            size={11}
-            weight="bold"
-            className={`text-[var(--muted)] transition-transform duration-200 shrink-0 ${
-              isOpen ? "rotate-180" : ""
-            }`}
-          />
-        )}
-      </button>
-
-      {/* Flat Quiet Luxury Dropdown Menu */}
-      {user && isOpen && (
+      {/* Flat Quiet Luxury Dropdown Menu - only when showDropdown is true */}
+      {showDropdown && user && isOpen && (
         <div
           className={`absolute ${positionClasses} w-64 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] p-2 z-50 text-[var(--foreground)] animate-in fade-in zoom-in-95 duration-100 shadow-xl`}
         >
