@@ -5,7 +5,7 @@ import { WishItem, TagType, PriorityLevel, ShoppingLink } from "@/types";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSwipeDismiss } from "@/hooks/useSwipeDismiss";
+import { useModalBackGesture } from "@/hooks/useModalBackGesture";
 import {
   X,
   UploadSimple,
@@ -84,9 +84,10 @@ export const WishModal: React.FC<WishModalProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { contentRef, dragOffset, touchHandlers } = useSwipeDismiss<HTMLFormElement>({
+  const { dragOffset, touchHandlers } = useModalBackGesture({
+    isOpen,
     onClose,
-    isEnabled: isOpen,
+    modalId: "wish-modal",
   });
 
   // Reset or populate on open
@@ -296,16 +297,12 @@ export const WishModal: React.FC<WishModalProps> = ({
       <div
         {...touchHandlers}
         style={{
-          transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
-          transition: dragOffset === 0 ? "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+          transform: dragOffset > 0 ? `translateX(${dragOffset}px)` : undefined,
+          opacity: dragOffset > 0 ? Math.max(0.5, 1 - dragOffset / 300) : undefined,
+          transition: dragOffset === 0 ? "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease" : "none",
         }}
         className="relative w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[92vh] bg-[var(--surface)] border-0 sm:border sm:border-[var(--border-subtle)] rounded-none sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col my-0 sm:my-4 animate-in zoom-in-95 duration-150"
       >
-        {/* Mobile Swipe / Drag Handle Indicator */}
-        <div className="sm:hidden w-full flex items-center justify-center pt-2.5 pb-1 shrink-0 bg-[var(--surface)]">
-          <div className="w-10 h-1 rounded-full bg-[var(--muted-light)]/40" />
-        </div>
-
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
           <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
@@ -328,7 +325,6 @@ export const WishModal: React.FC<WishModalProps> = ({
 
         {/* Scrollable Form Body */}
         <form
-          ref={contentRef}
           id="wish-modal-form"
           onSubmit={handleSubmit}
           className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 select-text"
@@ -474,7 +470,6 @@ export const WishModal: React.FC<WishModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full text-lg sm:text-xl font-bold tracking-tight text-[var(--foreground)] placeholder:text-[var(--placeholder)] bg-transparent border-0 border-b border-transparent focus:border-[var(--border-subtle)] pb-1.5 focus:outline-none transition"
-              autoFocus={!wishToEdit}
             />
 
             <textarea

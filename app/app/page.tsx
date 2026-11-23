@@ -58,6 +58,11 @@ export default function WishlistApp() {
     setIsWishModalOpen(true);
   }, []);
 
+  const handleCloseWishModal = useCallback(() => {
+    setIsWishModalOpen(false);
+    setWishToEdit(null);
+  }, []);
+
   const handleEditWish = useCallback((wish: WishItem) => {
     setWishToEdit(wish);
     setIsWishModalOpen(true);
@@ -200,7 +205,7 @@ export default function WishlistApp() {
       {/* Modals */}
       <WishModal
         isOpen={isWishModalOpen}
-        onClose={() => setIsWishModalOpen(false)}
+        onClose={handleCloseWishModal}
         wishToEdit={wishToEdit}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
