@@ -4,6 +4,8 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { SmoothScroll } from "@/components/landing/SmoothScroll";
+import { Navbar } from "@/components/landing/Navbar";
+import { HeroSection } from "@/components/landing/HeroSection";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   ArrowRight,
@@ -23,68 +25,13 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--foreground)] selection:text-[var(--background)] font-sans antialiased overflow-x-hidden">
       <SmoothScroll />
 
-      {/* Clean Navigation Bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--background)]/85 backdrop-blur-md select-none transition-all duration-300 border-b border-[var(--border-subtle)]">
-        <div className="max-w-7xl mx-auto px-6 sm:px-10 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer" title="almost">
-            <Image
-              src={wordmarkLogo}
-              alt="almost"
-              width={120}
-              height={28}
-              priority
-              className="h-6 sm:h-7 w-auto object-contain"
-            />
-          </Link>
-
-          <div>
-            <Link
-              href="/app"
-              className="h-10 inline-flex items-center gap-2 px-5 rounded-full text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer shadow-xs"
-            >
-              <span>Wishlist</span>
-              <ArrowRight size={13} weight="bold" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      {/* Dynamic Elevated Navigation Bar */}
+      <Navbar />
 
       {/* Main Content */}
-      <main className="pt-32 sm:pt-40 pb-24 px-6 sm:px-10 max-w-7xl mx-auto space-y-24 sm:space-y-32">
-        {/* Hero Section (Centered Minimalist Architecture) */}
-        <section className="text-center space-y-8 sm:space-y-10">
-          <div className="space-y-3.5 max-w-3xl mx-auto">
-            {/* Clean Editorial Eyebrow (No pill box, no dot indicator, sentence-case) */}
-            <p className="text-xs sm:text-sm font-medium text-[var(--primary)] select-none">
-              Intentional wishlist manager
-            </p>
-
-            {/* Refined, Scaled Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[var(--foreground)] leading-[1.12] text-balance">
-              A New Standard
-              <br />
-              in Mindful Ownership
-            </h1>
-
-            {/* Clean Subtitle */}
-            <p className="text-sm sm:text-base text-[var(--muted)] max-w-xl mx-auto leading-relaxed text-balance pt-1">
-              Take full control of your desires with a unified platform for classifying, budgeting, and pooling savings for the things worth waiting for.
-            </p>
-          </div>
-
-          {/* Screenshot Showcase (Direct, Pure Image with Rounded Corners & Hairline Border) */}
-          <div className="max-w-5xl mx-auto select-none pt-4">
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/preview/dashboard-preview.webp"
-                alt="Almost Dashboard Interface Preview"
-                className="w-full h-auto object-cover block"
-                loading="eager"
-              />
-            </div>
-          </div>
-        </section>
+      <main className="pt-24 sm:pt-28 pb-24 px-5 sm:px-8 lg:px-10 max-w-7xl mx-auto space-y-24 sm:space-y-32">
+        {/* Animated Luxury Hero Section */}
+        <HeroSection />
 
         {/* Section 2: Principles */}
         <section id="principles" className="space-y-10 scroll-mt-24">
@@ -151,7 +98,7 @@ export default function LandingPage() {
         </section>
 
         {/* Section 3: Curated Objects Showcase */}
-        <section className="space-y-8">
+        <section id="curated-objects" className="space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-[var(--foreground)]">
@@ -169,8 +116,10 @@ export default function LandingPage() {
               <div className="h-60 w-full overflow-hidden bg-[var(--background)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80"
+                  src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80"
                   alt="Leica Q3 Camera"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover hover:scale-102 transition duration-500"
                 />
               </div>
@@ -199,8 +148,10 @@ export default function LandingPage() {
               <div className="h-60 w-full overflow-hidden bg-[var(--background)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80"
+                  src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80"
                   alt="MacBook Pro"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover hover:scale-102 transition duration-500"
                 />
               </div>
@@ -229,8 +180,10 @@ export default function LandingPage() {
               <div className="h-60 w-full overflow-hidden bg-[var(--background)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=1200&q=80"
+                  src="https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?auto=format&fit=crop&w=800&q=80"
                   alt="Rimowa Cabin"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover hover:scale-102 transition duration-500"
                 />
               </div>
@@ -257,7 +210,7 @@ export default function LandingPage() {
         </section>
 
         {/* Section 4: Privacy & Focus (Flat Minimal Architecture, Zero Russian-Doll Cards) */}
-        <section className="p-8 sm:p-12 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-8">
+        <section id="privacy" className="p-8 sm:p-12 rounded-3xl bg-[var(--surface)] border border-[var(--border-subtle)] space-y-8 scroll-mt-24">
           <div className="max-w-2xl space-y-3">
             <h2 className="text-2xl sm:text-4xl font-bold text-[var(--foreground)] leading-tight">
               Private by default.
@@ -309,7 +262,7 @@ export default function LandingPage() {
           <div className="pt-2 flex justify-center">
             <Link
               href="/app"
-              className="h-11 inline-flex items-center gap-2 px-7 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer shadow-xs"
+              className="h-11 inline-flex items-center gap-2 px-7 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer"
             >
               <span>Open Wishlist</span>
               <ArrowRight size={14} weight="bold" />

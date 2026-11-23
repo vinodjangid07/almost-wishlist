@@ -5,6 +5,7 @@ import { WishItem, WishMember } from "@/types";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSwipeDismiss } from "@/hooks/useSwipeDismiss";
 import {
   X,
   ArrowSquareOut,
@@ -39,6 +40,11 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
   const [myContribution, setMyContribution] = useState<string>("");
   const [savingContribution, setSavingContribution] = useState(false);
 
+  const { contentRef, dragOffset, touchHandlers } = useSwipeDismiss({
+    onClose,
+    isEnabled: isOpen,
+  });
+
   const isFulfilled = Boolean(wish?.isFulfilled ?? wish?.isPurchased);
 
   // Initialize personal contribution input from member record
@@ -49,6 +55,18 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
       setMyContribution("");
     }
   }, [wish, user]);
+
+  // Keyboard shortcut: ESC to exit
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   const memberList: WishMember[] = useMemo(() => {
     if (!wish || !wish.isShared || !wish.members) return [];
@@ -103,19 +121,44 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/65 backdrop-blur-md overflow-hidden select-none"
       >
-        <div className="relative w-full max-w-lg bg-[var(--surface)] rounded-3xl p-6 sm:p-7 text-[var(--foreground)] my-8 max-h-[90vh] overflow-y-auto">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 p-2 text-[var(--muted)] hover:text-[var(--foreground)] rounded-xl hover:bg-[var(--surface-hover)] transition z-10 cursor-pointer"
-            title="Close"
-          >
-            <X size={16} />
-          </button>
+        <div
+          {...touchHandlers}
+          style={{
+            transform: dragOffset > 0 ? `translateY(${dragOffset}px)` : undefined,
+            transition: dragOffset === 0 ? "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)" : "none",
+          }}
+          className="relative w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[92vh] bg-[var(--surface)] border-0 sm:border sm:border-[var(--border-subtle)] rounded-none sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col my-0 sm:my-4 text-[var(--foreground)] animate-in zoom-in-95 duration-150"
+        >
+          {/* Mobile Swipe / Drag Handle Indicator */}
+          <div className="sm:hidden w-full flex items-center justify-center pt-2.5 pb-1 shrink-0 bg-[var(--surface)]">
+            <div className="w-10 h-1 rounded-full bg-[var(--muted-light)]/40" />
+          </div>
 
-          {/* Hero image */}
+          {/* Header Bar */}
+          <div className="px-5 sm:px-7 py-3.5 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
+            <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
+              Wish Details
+            </h2>
+
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--muted)]">
+                ESC
+              </span>
+              <button
+                onClick={onClose}
+                className="p-1.5 text-[var(--muted)] hover:text-[var(--foreground)] rounded-lg hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                title="Close (ESC)"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          </div>
+
+          {/* Scrollable Content Body */}
+          <div ref={contentRef} className="p-5 sm:p-7 space-y-4 overflow-y-auto flex-1 select-text">
+            {/* Hero image */}
           {wish.imageUrl && (
             <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-[var(--surface-raised)] mb-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -358,30 +401,31 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
               </div>
             </div>
           )}
+          </div>
 
-          {/* Footer (Standardized h-10 button controls) */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-4 text-xs">
+          {/* Pinned Sticky Footer */}
+          <div className="px-5 sm:px-7 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--surface)]/95 backdrop-blur-md shrink-0 flex items-center justify-between gap-2 text-xs">
             <button
               onClick={() => toggleFulfilled(wish.id)}
-              className={`h-10 px-4 rounded-xl font-semibold transition cursor-pointer ${
+              className={`h-9 px-3.5 sm:px-4 rounded-xl font-semibold transition cursor-pointer text-xs ${
                 isFulfilled
                   ? "bg-[var(--surface-raised)] text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
-                  : "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]"
+                  : "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] shadow-xs"
               }`}
             >
               {isFulfilled ? "Mark Pending" : "Mark Fulfilled"}
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {isCreator && (
                 <button
                   onClick={() => {
                     onClose();
                     onEdit(wish);
                   }}
-                  className="h-10 inline-flex items-center gap-1.5 px-4 rounded-xl font-medium bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer"
+                  className="h-9 inline-flex items-center gap-1.5 px-3 sm:px-4 rounded-xl font-medium bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer text-xs"
                 >
-                  <PencilSimple size={14} />
+                  <PencilSimple size={13} />
                   <span>Edit</span>
                 </button>
               )}
@@ -389,28 +433,21 @@ export const WishDetailModal: React.FC<WishDetailModalProps> = ({
               {isCreator ? (
                 <button
                   onClick={() => setIsDeleteModalOpen(true)}
-                  className="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl font-medium bg-[var(--surface-raised)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] text-[var(--muted)] transition cursor-pointer"
+                  className="h-9 inline-flex items-center justify-center w-9 rounded-xl font-medium bg-[var(--surface-raised)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] text-[var(--muted)] transition cursor-pointer text-xs"
                   title="Delete wish"
                 >
-                  <Trash size={15} />
+                  <Trash size={14} />
                 </button>
               ) : (
                 <button
                   onClick={handleLeave}
-                  className="h-10 inline-flex items-center gap-1.5 px-3 rounded-xl font-medium bg-[var(--surface-raised)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] text-[var(--muted)] transition cursor-pointer"
+                  className="h-9 inline-flex items-center gap-1.5 px-3 rounded-xl font-medium bg-[var(--surface-raised)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] text-[var(--muted)] transition cursor-pointer text-xs"
                   title="Leave shared wish"
                 >
-                  <SignOut size={15} />
+                  <SignOut size={14} />
                   <span>Leave</span>
                 </button>
               )}
-
-              <button
-                onClick={onClose}
-                className="h-10 px-4 rounded-xl font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition cursor-pointer"
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>

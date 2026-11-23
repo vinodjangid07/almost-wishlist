@@ -12,6 +12,8 @@ import { EditSavingsModal } from "@/components/savings/EditSavingsModal";
 import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
 import { AuthModal } from "@/components/modals/AuthModal";
 import { JoinWishModal } from "@/components/modals/JoinWishModal";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -69,6 +71,14 @@ export default function WishlistApp() {
     setIsEditSavingsOpen(true);
   }, []);
 
+  const handleOpenJoinWish = useCallback(() => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsJoinWishOpen(true);
+  }, [user]);
+
   const handleCloseMobile = useCallback(() => {
     setIsMobileMenuOpen(false);
   }, []);
@@ -94,7 +104,7 @@ export default function WishlistApp() {
         onCloseMobile={handleCloseMobile}
         onOpenAddWish={handleOpenAddWish}
         onOpenEditSavings={handleOpenEditSavings}
-        onOpenJoinWish={() => setIsJoinWishOpen(true)}
+        onOpenJoinWish={handleOpenJoinWish}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
@@ -130,45 +140,15 @@ export default function WishlistApp() {
 
           {/* Right: Controls (Theme, Avatar, Join Wish, Add Wish) */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Theme Toggle (Desktop only - mobile accessible inside drawer) */}
-            <button
-              onClick={toggleTheme}
-              className="hidden md:flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--foreground)] transition shrink-0 cursor-pointer"
-              title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
-            >
-              {resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
-            {/* User Profile Pill (Desktop only - mobile accessible inside drawer) */}
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="hidden md:flex h-10 items-center gap-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer"
-              title="Account / Profile"
-            >
-              <div className="w-5 h-5 rounded-full bg-[var(--surface-raised)] text-[var(--foreground)] flex items-center justify-center text-[10px] font-semibold shrink-0 overflow-hidden">
-                {user?.photoURL && !headerAvatarError ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.photoURL}
-                    alt=""
-                    referrerPolicy="no-referrer"
-                    onError={() => setHeaderAvatarError(true)}
-                    className="w-full h-full object-cover"
-                  />
-                ) : user ? (
-                  <span>{userInitial}</span>
-                ) : (
-                  <User size={12} weight="bold" />
-                )}
-              </div>
-              <span className="hidden lg:inline text-xs font-medium text-[var(--foreground)] max-w-[100px] truncate">
-                {user ? user.displayName || user.email?.split("@")[0] : "Sign In"}
-              </span>
-            </button>
+            {/* Theme Toggle & Profile Dropdown (Shared Components) */}
+            <div className="hidden md:flex items-center gap-2 sm:gap-2.5">
+              <ThemeToggle />
+              <ProfileDropdown onOpenAuthModal={() => setIsAuthModalOpen(true)} />
+            </div>
 
             {/* Join Shared Wish CTA (Desktop only - mobile accessible inside drawer) */}
             <button
-              onClick={() => setIsJoinWishOpen(true)}
+              onClick={handleOpenJoinWish}
               className="hidden md:flex h-10 px-3.5 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--foreground)] items-center gap-1.5 transition cursor-pointer shrink-0"
               title="Join a shared wish with invite code"
             >
@@ -222,6 +202,7 @@ export default function WishlistApp() {
         isOpen={isWishModalOpen}
         onClose={() => setIsWishModalOpen(false)}
         wishToEdit={wishToEdit}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       <WishDetailModal
@@ -234,6 +215,7 @@ export default function WishlistApp() {
       <JoinWishModal
         isOpen={isJoinWishOpen}
         onClose={() => setIsJoinWishOpen(false)}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onJoinedSuccess={(wishId) => {
           const found = wishes.find((w) => w.id === wishId);
           if (found) handleViewDetail(found);

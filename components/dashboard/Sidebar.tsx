@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
 import {
   SquaresFour,
   ChartPieSlice,
@@ -73,9 +74,14 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
   }, [onOpenEditSavings, onCloseMobile]);
 
   const handleJoinWish = useCallback(() => {
+    if (!user) {
+      if (onOpenAuthModal) onOpenAuthModal();
+      if (onCloseMobile) onCloseMobile();
+      return;
+    }
     if (onOpenJoinWish) onOpenJoinWish();
     if (onCloseMobile) onCloseMobile();
-  }, [onOpenJoinWish, onCloseMobile]);
+  }, [user, onOpenAuthModal, onOpenJoinWish, onCloseMobile]);
 
   const handleAuth = useCallback(() => {
     if (onOpenAuthModal) onOpenAuthModal();
@@ -130,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           {/* Brand & Collapse Header - Exact h-16 + border-b to align with dashboard command header */}
           <div
             className={`h-16 border-b border-[var(--border-subtle)] flex items-center shrink-0 ${
-              isCollapsed ? "justify-center px-2" : "justify-between px-4"
+              isCollapsed ? "justify-center px-2" : "justify-between px-3.5"
             }`}
           >
             {!isCollapsed ? (
@@ -139,25 +145,25 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 <Link
                   href="/"
                   title="Return to Home"
-                  className="p-1 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center"
+                  className="w-10 h-10 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center group"
                 >
                   <Image
                     src={appIconSrc}
                     alt="almost"
-                    width={28}
-                    height={28}
+                    width={36}
+                    height={36}
                     priority
-                    className="w-7 h-7 rounded-lg object-contain"
+                    className="w-8.5 h-8.5 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105"
                   />
                 </Link>
 
-                {/* Collapsible toggle button */}
+                {/* Collapsible toggle button - Perfectly balanced with app icon */}
                 <button
                   onClick={() => setIsCollapsed(true)}
                   title="Collapse sidebar"
-                  className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                  className="w-10 h-10 rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center"
                 >
-                  <SidebarSimple size={18} weight="regular" />
+                  <SidebarSimple size={20} weight="regular" />
                 </button>
               </>
             ) : (
@@ -165,23 +171,23 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
               <button
                 onClick={() => setIsCollapsed(false)}
                 title="Expand sidebar"
-                className="relative group w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                className="relative group w-10 h-10 flex items-center justify-center rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
               >
                 {/* Default: App icon (fades out on hover) */}
                 <div className="flex items-center justify-center transition-opacity duration-150 group-hover:opacity-0">
                   <Image
                     src={appIconSrc}
                     alt="almost"
-                    width={28}
-                    height={28}
+                    width={36}
+                    height={36}
                     priority
-                    className="w-7 h-7 rounded-lg object-contain"
+                    className="w-8.5 h-8.5 rounded-xl object-contain"
                   />
                 </div>
 
                 {/* Hover state: Reveal sidebar expand icon */}
                 <div className="absolute inset-0 flex items-center justify-center text-[var(--foreground)] opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none">
-                  <SidebarSimple size={18} weight="regular" />
+                  <SidebarSimple size={20} weight="regular" />
                 </div>
               </button>
             )}
@@ -206,8 +212,20 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           </div>
         </div>
 
-        {/* Bottom Section: Total Savings Status Only */}
-        <div className={isCollapsed ? "p-2" : "p-4"}>
+        {/* Bottom Section: Profile Dropdown & Total Savings Status */}
+        <div className={`space-y-2.5 ${isCollapsed ? "p-2" : "p-4"}`}>
+          <ProfileDropdown
+            collapsed={isCollapsed}
+            className={
+              isCollapsed
+                ? "w-10 h-10 p-0 justify-center mx-auto"
+                : "w-full justify-between h-10"
+            }
+            align="left"
+            direction="up"
+            onOpenAuthModal={onOpenAuthModal}
+          />
+
           {!isCollapsed && (
             <div
               onClick={handleEditSavings}
@@ -244,62 +262,40 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           <div className="relative w-72 max-w-[80vw] bg-[var(--surface)] border-r border-[var(--border-subtle)] h-full flex flex-col justify-between z-10 animate-in slide-in-from-left duration-200">
             <div>
               {/* Header with Brand and Close - Exact h-16 with border-b */}
-              <div className="h-16 px-5 border-b border-[var(--border-subtle)] flex items-center justify-between">
+              <div className="h-16 px-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
                 <Link
                   href="/"
                   title="Return to Home"
-                  className="p-1 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center"
+                  className="w-10 h-10 rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center group"
                   onClick={onCloseMobile}
                 >
                   <Image
                     src={appIconSrc}
                     alt="almost"
-                    width={28}
-                    height={28}
-                    className="w-7 h-7 rounded-lg object-contain"
+                    width={36}
+                    height={36}
+                    className="w-8.5 h-8.5 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105"
                   />
                 </Link>
 
                 <button
                   onClick={onCloseMobile}
-                  className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                  className="w-10 h-10 rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer flex items-center justify-center"
                   title="Close navigation"
                 >
-                  <X size={18} />
+                  <X size={20} />
                 </button>
               </div>
 
               <div className="p-5 space-y-4">
-                {/* Mobile User Profile Pill */}
-                <button
-                  onClick={handleAuth}
-                  className="w-full h-11 flex items-center justify-between px-3.5 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-full bg-[var(--surface-raised)] text-[var(--foreground)] flex items-center justify-center text-xs font-semibold overflow-hidden">
-                      {user?.photoURL && !avatarError ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={user.photoURL}
-                          alt=""
-                          referrerPolicy="no-referrer"
-                          onError={() => setAvatarError(true)}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : user ? (
-                        <span>{userInitial}</span>
-                      ) : (
-                        <User size={14} weight="bold" />
-                      )}
-                    </div>
-                    <span className="text-xs font-medium text-[var(--foreground)] truncate max-w-[130px]">
-                      {user ? user.displayName || user.email?.split("@")[0] : "Sign In / Account"}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-[var(--primary)] font-medium">
-                    {user ? "Manage" : "Sign In"}
-                  </span>
-                </button>
+                {/* Mobile User Profile Dropdown */}
+                <ProfileDropdown
+                  className="w-full justify-between h-11"
+                  align="left"
+                  direction="down"
+                  onOpenAuthModal={onOpenAuthModal}
+                  onAction={onCloseMobile}
+                />
 
                 {/* Mobile Add Wish CTA */}
                 <button
