@@ -3,16 +3,11 @@
 import React, { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "@/contexts/ThemeContext";
 import { ArrowRight } from "@phosphor-icons/react";
 import { HeroField } from "@/components/landing/HeroField";
 
 export const HeroSection: React.FC = () => {
-  const { resolvedTheme } = useTheme();
   const heroRef = useRef<HTMLElement>(null);
-
-  const appIconSrc =
-    resolvedTheme === "dark" ? "/dark-app-icon.webp" : "/light-app-icon.webp";
 
   return (
     <section
@@ -49,12 +44,20 @@ export const HeroSection: React.FC = () => {
               <br />
               <span className="inline-flex items-center gap-3 sm:gap-5 align-middle">
                 <Image
-                  src={appIconSrc}
+                  src="/light-app-icon.webp"
                   alt="almost"
                   width={108}
                   height={108}
                   priority
-                  className="inline-block align-middle w-[0.78em] h-[0.78em] rounded-2xl border border-[var(--border-subtle)] object-contain shrink-0 -translate-y-[0.04em]"
+                  className="inline-block align-middle w-[0.78em] h-[0.78em] rounded-2xl border border-[var(--border-subtle)] object-contain shrink-0 -translate-y-[0.04em] dark:hidden"
+                />
+                <Image
+                  src="/dark-app-icon.webp"
+                  alt="almost"
+                  width={108}
+                  height={108}
+                  priority
+                  className="hidden dark:inline-block align-middle w-[0.78em] h-[0.78em] rounded-2xl border border-[var(--border-subtle)] object-contain shrink-0 -translate-y-[0.04em]"
                 />
                 <span>waiting for.</span>
               </span>

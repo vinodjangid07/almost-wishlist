@@ -49,9 +49,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
   const { resolvedTheme, toggleTheme } = useTheme();
   const [avatarError, setAvatarError] = useState(false);
 
-  const appIconSrc =
-    resolvedTheme === "dark" ? "/dark-app-icon.webp" : "/light-app-icon.webp";
-
   const userInitial = user?.displayName
     ? user.displayName.charAt(0).toUpperCase()
     : user?.email
@@ -148,12 +145,20 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                   className="w-10 h-10 flex items-center justify-center cursor-pointer select-none shrink-0"
                 >
                   <Image
-                    src={appIconSrc}
+                    src="/light-app-icon.webp"
                     alt="almost"
                     width={40}
                     height={40}
                     priority
-                    className="w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90 shrink-0"
+                    className="w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90 shrink-0 dark:hidden"
+                  />
+                  <Image
+                    src="/dark-app-icon.webp"
+                    alt="almost"
+                    width={40}
+                    height={40}
+                    priority
+                    className="hidden dark:block w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90 shrink-0"
                   />
                 </Link>
 
@@ -176,12 +181,20 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 {/* Default: App icon (fades out on hover) */}
                 <div className="flex items-center justify-center transition-opacity duration-150 group-hover:opacity-0">
                   <Image
-                    src={appIconSrc}
+                    src="/light-app-icon.webp"
                     alt="almost"
                     width={40}
                     height={40}
                     priority
-                    className="w-10 h-10 rounded-xl object-contain"
+                    className="w-10 h-10 rounded-xl object-contain dark:hidden"
+                  />
+                  <Image
+                    src="/dark-app-icon.webp"
+                    alt="almost"
+                    width={40}
+                    height={40}
+                    priority
+                    className="hidden dark:block w-10 h-10 rounded-xl object-contain"
                   />
                 </div>
 
@@ -276,11 +289,18 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                   onClick={onCloseMobile}
                 >
                   <Image
-                    src={appIconSrc}
+                    src="/light-app-icon.webp"
                     alt="almost"
                     width={40}
                     height={40}
-                    className="w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90"
+                    className="w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90 dark:hidden"
+                  />
+                  <Image
+                    src="/dark-app-icon.webp"
+                    alt="almost"
+                    width={40}
+                    height={40}
+                    className="hidden dark:block w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90"
                   />
                 </Link>
 

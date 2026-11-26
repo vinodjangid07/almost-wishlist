@@ -14,20 +14,27 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("system");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Read saved theme from localStorage
-    const saved = localStorage.getItem("almost_theme") as Theme | null;
-    if (saved && (saved === "light" || saved === "dark" || saved === "system")) {
-      setThemeState(saved);
-    } else {
-      setThemeState("light");
+    // Read saved theme from localStorage; default to OS preference ("system")
+    try {
+      const saved = localStorage.getItem("almost_theme") as Theme | null;
+      if (saved && (saved === "light" || saved === "dark" || saved === "system")) {
+        setThemeState(saved);
+      } else {
+        setThemeState("system");
+      }
+    } catch {
+      setThemeState("system");
     }
+    setIsInitialized(true);
   }, []);
 
   useEffect(() => {
+    if (!isInitialized) return;
     const root = document.documentElement;
 
     const applyTheme = () => {
@@ -41,6 +48,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       setResolvedTheme(active);
+      root.style.colorScheme = active;
 
       if (active === "dark") {
         root.classList.add("dark");
@@ -57,7 +65,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       mediaQuery.addEventListener("change", handler);
       return () => mediaQuery.removeEventListener("change", handler);
     }
-  }, [theme]);
+  }, [theme, isInitialized]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);

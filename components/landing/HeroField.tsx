@@ -146,7 +146,10 @@ export const HeroField: React.FC<{ hostRef: React.RefObject<HTMLElement | null> 
     gl.canvas.style.display = "block";
     canvasHost.appendChild(gl.canvas);
 
-    const pal = resolvedTheme === "dark" ? PALETTES.dark : PALETTES.light;
+    const isDark =
+      resolvedTheme === "dark" ||
+      document.documentElement.classList.contains("dark");
+    const pal = isDark ? PALETTES.dark : PALETTES.light;
 
     const program = new Program(gl, {
       vertex: VERTEX_SHADER,

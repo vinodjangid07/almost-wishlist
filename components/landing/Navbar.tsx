@@ -3,19 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "@/contexts/ThemeContext";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
 import { AuthModal } from "@/components/modals/AuthModal";
 
 export const Navbar: React.FC = () => {
-  const { resolvedTheme } = useTheme();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  const wordmarkLogo =
-    resolvedTheme === "dark"
-      ? "/light-wordmark-logo.webp"
-      : "/dark-wordmark-logo.webp";
 
   return (
     <>
@@ -28,12 +21,20 @@ export const Navbar: React.FC = () => {
             title="almost • quiet wishlist manager"
           >
             <Image
-              src={wordmarkLogo}
+              src="/dark-wordmark-logo.webp"
               alt="almost"
               width={120}
               height={28}
               priority
-              className="h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
+              className="h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85 dark:hidden"
+            />
+            <Image
+              src="/light-wordmark-logo.webp"
+              alt="almost"
+              width={120}
+              height={28}
+              priority
+              className="hidden dark:block h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-85"
             />
           </Link>
 

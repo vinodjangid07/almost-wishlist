@@ -3,17 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "@/contexts/ThemeContext";
 import { ArrowRight } from "@phosphor-icons/react";
 
 export const FooterFinale: React.FC = () => {
-  const { resolvedTheme } = useTheme();
-
-  const wordmarkLogo =
-    resolvedTheme === "dark"
-      ? "/light-wordmark-logo.webp"
-      : "/dark-wordmark-logo.webp";
-
   return (
     <footer className="pt-16 sm:pt-24 pb-12 select-none">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 space-y-20 sm:space-y-28">
@@ -47,11 +39,18 @@ export const FooterFinale: React.FC = () => {
         <div className="pt-8 border-t border-[var(--border-subtle)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 text-xs text-[var(--muted)]">
           <div className="flex items-center gap-3">
             <Image
-              src={wordmarkLogo}
+              src="/dark-wordmark-logo.webp"
               alt="almost"
               width={88}
               height={20}
-              className="h-5 w-auto object-contain"
+              className="h-5 w-auto object-contain dark:hidden"
+            />
+            <Image
+              src="/light-wordmark-logo.webp"
+              alt="almost"
+              width={88}
+              height={20}
+              className="hidden dark:block h-5 w-auto object-contain"
             />
             <span className="text-[var(--muted-light)]">·</span>
             <span>almost yours</span>

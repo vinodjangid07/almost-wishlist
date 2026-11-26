@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
@@ -17,7 +16,6 @@ import { ArrowLeft, ArrowUpRight, Check } from "@phosphor-icons/react";
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
-  const { resolvedTheme } = useTheme();
   const { wishes } = useWishlist();
   const {
     currentSavings,
@@ -39,14 +37,6 @@ export default function ProfilePage() {
       setDisplayNameInput(user.displayName);
     }
   }, [user]);
-
-  const wordmarkLogo =
-    resolvedTheme === "dark"
-      ? "/light-wordmark-logo.webp"
-      : "/dark-wordmark-logo.webp";
-
-  const appIconSrc =
-    resolvedTheme === "dark" ? "/dark-app-icon.webp" : "/light-app-icon.webp";
 
   const userInitial = user?.displayName
     ? user.displayName.charAt(0).toUpperCase()
@@ -103,12 +93,20 @@ export default function ProfilePage() {
             title="almost • home"
           >
             <Image
-              src={wordmarkLogo}
+              src="/dark-wordmark-logo.webp"
               alt="almost"
               width={120}
               height={28}
               priority
-              className="h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
+              className="h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80 dark:hidden"
+            />
+            <Image
+              src="/light-wordmark-logo.webp"
+              alt="almost"
+              width={120}
+              height={28}
+              priority
+              className="hidden dark:block h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
             />
           </Link>
 
@@ -449,11 +447,18 @@ export default function ProfilePage() {
           <div className="rounded-3xl bg-[var(--surface)] p-8 sm:p-12 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
               <Image
-                src={appIconSrc}
+                src="/light-app-icon.webp"
                 alt="almost"
                 width={56}
                 height={56}
-                className="w-14 h-14 rounded-2xl object-contain"
+                className="w-14 h-14 rounded-2xl object-contain dark:hidden"
+              />
+              <Image
+                src="/dark-app-icon.webp"
+                alt="almost"
+                width={56}
+                height={56}
+                className="hidden dark:block w-14 h-14 rounded-2xl object-contain"
               />
               <div className="space-y-2">
                 <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-[var(--foreground)]">
