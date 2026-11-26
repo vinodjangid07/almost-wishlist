@@ -78,6 +78,8 @@ export const metadata: Metadata = {
   },
 };
 
+const motionFlagsScript = `document.documentElement.classList.add('js');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('motion');`;
+
 export default function RootLayout({
   children,
 }: {
@@ -89,6 +91,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: motionFlagsScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--foreground)] selection:text-[var(--background)] font-sans">
         <AppProviders>{children}</AppProviders>
       </body>

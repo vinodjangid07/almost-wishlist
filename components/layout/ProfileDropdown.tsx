@@ -103,7 +103,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
           onClick={() => {
             if (onAction) onAction();
           }}
-          className={`h-10 flex items-center gap-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
+          className={`h-10 flex items-center gap-2 px-3 rounded-xl bg-[var(--background)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
           title="Account / Profile"
           aria-label="Account profile"
         >
@@ -134,7 +134,9 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         /* Standard Profile Button with dropdown trigger */
         <button
           onClick={handleTriggerClick}
-          className={`h-10 flex items-center gap-2 px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
+          className={`h-10 flex items-center gap-2 px-3 rounded-xl ${
+            className.includes("bg-") ? "" : "bg-[var(--surface)]"
+          } hover:bg-[var(--surface-hover)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
           title={user ? "Account / Profile" : "Sign In to Account"}
           aria-label={user ? "Account menu" : "Sign In"}
         >
@@ -175,12 +177,12 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         </button>
       )}
 
-      {/* Flat Quiet Luxury Dropdown Menu - only when showDropdown is true */}
+      {/* Flat Quiet Luxury Dropdown Menu - matches dashboard surface & cardlet style */}
       {showDropdown && user && isOpen && (
         <div
-          className={`absolute ${positionClasses} w-64 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] p-2 z-50 text-[var(--foreground)] animate-in fade-in zoom-in-95 duration-100 shadow-xl`}
+          className={`absolute ${positionClasses} w-60 rounded-2xl bg-[var(--surface)] ring-1 ring-[var(--border-subtle)] p-2 z-50 text-[var(--foreground)]`}
         >
-          <div className="p-3 border-b border-[var(--border-subtle)] space-y-0.5">
+          <div className="p-2.5 rounded-xl bg-[var(--background)] mb-1.5 space-y-0.5">
             <p className="text-xs font-semibold text-[var(--foreground)] truncate">
               {user.displayName || "Account"}
             </p>
@@ -189,11 +191,11 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
             </p>
           </div>
 
-          <div className="py-1 space-y-0.5">
+          <div className="space-y-0.5">
             <Link
               href="/app"
               onClick={handleItemClick}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
+              className="w-full h-9 flex items-center justify-between px-2.5 text-xs font-medium rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
             >
               <span>Dashboard</span>
               <ArrowRight size={12} className="text-[var(--muted)]" />
@@ -202,17 +204,17 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
             <Link
               href="/profile"
               onClick={handleItemClick}
-              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
+              className="w-full h-9 flex items-center justify-between px-2.5 text-xs font-medium rounded-xl hover:bg-[var(--surface-hover)] transition cursor-pointer"
             >
               <span>Manage Account</span>
               <Gear size={13} className="text-[var(--muted)]" />
             </Link>
           </div>
 
-          <div className="pt-1 border-t border-[var(--border-subtle)]">
+          <div className="mt-1 pt-1">
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-[var(--danger)] hover:bg-[var(--danger-bg)] rounded-xl transition cursor-pointer"
+              className="w-full h-9 flex items-center gap-2 px-2.5 text-xs font-medium text-[var(--danger)] hover:bg-[var(--danger-bg)] rounded-xl transition cursor-pointer"
             >
               <SignOut size={14} />
               <span>Sign Out</span>

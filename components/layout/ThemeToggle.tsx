@@ -18,7 +18,9 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   return (
     <button
       onClick={toggleTheme}
-      className={`h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--foreground)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
+      className={`h-10 w-10 flex items-center justify-center rounded-xl ${
+        className.includes("bg-") ? "" : "bg-[var(--surface)]"
+      } hover:bg-[var(--surface-hover)] text-[var(--muted)] hover:text-[var(--foreground)] transition shrink-0 cursor-pointer select-none active:scale-95 ${className}`}
       title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
       aria-label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
     >

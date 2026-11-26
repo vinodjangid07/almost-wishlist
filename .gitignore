@@ -3,6 +3,8 @@
 # dependencies
 /inspo-designs
 /node_modules
+/ISSUES_LOG.md
+/DESIGN.md
 /.pnp
 .pnp.*
 .yarn/*

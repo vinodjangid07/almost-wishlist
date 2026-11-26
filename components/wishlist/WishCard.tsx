@@ -4,7 +4,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { WishItem } from "@/types";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
-import { CheckCircle, Circle, PencilSimple, Trash, ArrowSquareOut, UsersThree } from "@phosphor-icons/react";
+import { PencilSimple, Trash, ArrowSquareOut } from "@phosphor-icons/react";
 import { DeleteConfirmModal } from "@/components/modals/DeleteConfirmModal";
 
 interface WishCardProps {
@@ -41,18 +41,18 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
     <>
       <div
         onClick={() => onViewDetail(wish)}
-        className={`group relative flex flex-col justify-between rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--card-hover)] transition-all duration-200 cursor-pointer overflow-hidden ${
+        className={`group relative flex flex-col justify-between rounded-2xl bg-[var(--surface)] hover:bg-[var(--card-hover)] transition-colors duration-200 cursor-pointer overflow-hidden ${
           isFulfilled ? "opacity-60" : ""
         }`}
       >
-        {/* Top Image Preview */}
-        <div className="relative w-full h-48 bg-[var(--surface-raised)] overflow-hidden">
+        {/* Top Image Container (Clean recessed matte studio canvas, zero border lines) */}
+        <div className="relative w-full h-48 bg-[var(--background)]/80 overflow-hidden">
           {wish.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={wish.imageUrl}
               alt={wish.title}
-              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-103 ${
+              className={`w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal transition-transform duration-500 ease-out group-hover:scale-[1.03] ${
                 isFulfilled ? "grayscale" : ""
               }`}
             />
@@ -62,17 +62,16 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
             </div>
           )}
 
-          {/* Collaborative Badge */}
+          {/* Architectural Shared Label (No rounded-full bubble pill) */}
           {wish.isShared && (
-            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium">
-              <UsersThree size={13} weight="bold" />
-              <span>{memberCount} {memberCount === 1 ? "friend" : "friends"}</span>
+            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-black/65 backdrop-blur-xs text-white text-[11px] font-medium">
+              {memberCount} {memberCount === 1 ? "friend" : "friends"}
             </div>
           )}
 
           {isFulfilled && (
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center">
-              <span className="text-xs font-semibold px-4 py-1.5 rounded-full bg-white text-black">
+            <div className="absolute inset-0 bg-black/45 backdrop-blur-xs flex items-center justify-center">
+              <span className="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-[var(--surface)] text-[var(--foreground)]">
                 Fulfilled
               </span>
             </div>
@@ -80,10 +79,10 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
         </div>
 
         {/* Card Content */}
-        <div className="p-4 flex-1 flex flex-col justify-between gap-3">
+        <div className="p-5 flex-1 flex flex-col justify-between gap-4">
           <div>
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="font-semibold text-sm text-[var(--foreground)] line-clamp-1 group-hover:text-[var(--primary)] transition">
+            <div className="flex items-baseline justify-between gap-2">
+              <h3 className="font-semibold text-sm text-[var(--foreground)] line-clamp-1 group-hover:text-[var(--primary)] transition-colors">
                 {wish.title}
               </h3>
               <span className="text-[11px] text-[var(--muted)] shrink-0">
@@ -92,19 +91,19 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
             </div>
 
             {wish.description ? (
-              <p className="text-xs text-[var(--muted)] line-clamp-1 mt-0.5 leading-relaxed">
+              <p className="text-xs text-[var(--muted)] line-clamp-1 mt-1 leading-relaxed">
                 {wish.description}
               </p>
             ) : (
-              <span className="text-xs text-[var(--muted)] opacity-50 mt-0.5 block">No notes</span>
+              <span className="text-xs text-[var(--muted)] opacity-50 mt-1 block">No notes</span>
             )}
           </div>
 
           {/* Price & Progress */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-baseline justify-between gap-2">
-              <div className="flex items-baseline gap-1">
-                <span className="text-base sm:text-lg font-bold tabular-nums text-[var(--foreground)]">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-base sm:text-lg font-bold tabular-nums tracking-tight text-[var(--foreground)]">
                   {currency}{wish.estimatedPrice.toLocaleString("en-IN")}
                 </span>
                 {(wish.minPrice || wish.maxPrice) && (
@@ -123,9 +122,9 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
               )}
             </div>
 
-            {/* Sourcing Stores */}
+            {/* Sourcing Stores (Clean borderless chips) */}
             {wish.links && wish.links.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {wish.links.map((link) => (
                   <a
                     key={link.id}
@@ -133,7 +132,7 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-[var(--background)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition cursor-pointer"
                   >
                     <span>{link.storeName}</span>
                     <ArrowSquareOut size={10} className="opacity-60" />
@@ -143,30 +142,20 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
             )}
           </div>
 
-          {/* Card Action Row */}
+          {/* Quiet Recessed Action Footer (Zero borders, zero colorful pills) */}
           <div className="flex items-center justify-between pt-1">
             <button
               onClick={handleToggleFulfilled}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer ${
+              className={`h-8 px-3 rounded-lg bg-[var(--background)] hover:bg-[var(--surface-hover)] text-xs font-medium transition cursor-pointer ${
                 isFulfilled
-                  ? "bg-[var(--accent-green-bg)] text-[var(--accent-green)]"
-                  : "bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-[var(--foreground)]"
+                  ? "text-[var(--accent-green)]"
+                  : "text-[var(--muted)] hover:text-[var(--foreground)]"
               }`}
             >
-              {isFulfilled ? (
-                <>
-                  <CheckCircle size={14} weight="fill" />
-                  <span>Fulfilled</span>
-                </>
-              ) : (
-                <>
-                  <Circle size={14} weight="regular" />
-                  <span>Mark Fulfilled</span>
-                </>
-              )}
+              {isFulfilled ? "Fulfilled" : "Mark fulfilled"}
             </button>
 
-            <div className="flex items-center gap-1 text-[var(--muted)]">
+            <div className="flex items-center gap-1 text-[var(--muted)] md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -180,7 +169,7 @@ export const WishCard: React.FC<WishCardProps> = React.memo(({ wish, onEdit, onV
               <button
                 onClick={handleDeleteClick}
                 title="Delete wish"
-                className="p-1.5 rounded-lg hover:text-[var(--foreground)] hover:bg-[var(--surface-raised)] transition cursor-pointer"
+                className="p-1.5 rounded-lg hover:text-[var(--danger)] hover:bg-[var(--danger-bg)] transition cursor-pointer"
               >
                 <Trash size={15} />
               </button>

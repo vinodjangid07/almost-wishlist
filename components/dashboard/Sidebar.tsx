@@ -127,15 +127,15 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
     <>
       {/* Desktop Sticky Left Rail */}
       <aside
-        className={`hidden md:flex h-screen sticky top-0 bg-[var(--surface)] border-r border-[var(--border-subtle)] flex-col justify-between transition-all duration-200 z-30 select-none shrink-0 ${
+        className={`hidden md:flex h-screen sticky top-0 bg-[var(--surface)] border-r border-[var(--border-subtle)]/60 flex-col justify-between transition-all duration-200 z-30 select-none shrink-0 ${
           isCollapsed ? "w-16" : "w-56"
         }`}
       >
         {/* Top Section */}
         <div className="flex flex-col">
-          {/* Brand & Collapse Header - Exact h-16 + border-b to align with dashboard command header */}
+          {/* Brand & Collapse Header - Clean tonal flow without horizontal divider */}
           <div
-            className={`h-16 border-b border-[var(--border-subtle)] flex items-center shrink-0 ${
+            className={`h-16 flex items-center shrink-0 ${
               isCollapsed ? "justify-center px-2" : "justify-between px-3.5"
             }`}
           >
@@ -153,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                     width={40}
                     height={40}
                     priority
-                    className="w-10 h-10 rounded-xl border border-[var(--border-subtle)] object-contain transition duration-150 hover:brightness-90 shrink-0"
+                    className="w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90 shrink-0"
                   />
                 </Link>
 
@@ -181,7 +181,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                     width={40}
                     height={40}
                     priority
-                    className="w-10 h-10 rounded-xl border border-[var(--border-subtle)] object-contain"
+                    className="w-10 h-10 rounded-xl object-contain"
                   />
                 </div>
 
@@ -217,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           {isCollapsed ? (
             <button
               onClick={handleEditSavings}
-              className="w-10 h-10 mx-auto rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition flex items-center justify-center text-xs font-bold text-[var(--foreground)] cursor-pointer"
+              className="w-10 h-10 mx-auto rounded-xl bg-[var(--background)] hover:bg-[var(--surface-hover)] transition flex items-center justify-center text-xs font-bold text-[var(--foreground)] cursor-pointer"
               title={`Total savings: ${currency}${currentSavings.toLocaleString("en-IN")}`}
             >
               {currency}
@@ -225,7 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           ) : (
             <div
               onClick={handleEditSavings}
-              className="p-3 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] cursor-pointer hover:bg-[var(--surface-hover)] transition group"
+              className="p-3 rounded-xl bg-[var(--background)] cursor-pointer hover:bg-[var(--surface-hover)] transition group"
               title="Click to edit savings"
             >
               <div className="flex items-center justify-between text-xs text-[var(--muted)]">
@@ -245,20 +245,30 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         </div>
       </aside>
 
-      {/* Mobile Drawer (Visible only on < md when opened) */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex select-none">
-          {/* Backdrop */}
-          <div
-            onClick={onCloseMobile}
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in cursor-pointer"
-          />
+      {/* Mobile Drawer (Visible on < md, smoothly animated open/close) */}
+      <div
+        aria-hidden={!isMobileOpen}
+        className={`fixed inset-0 z-50 md:hidden flex select-none transition-opacity duration-300 ${
+          isMobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {/* Backdrop */}
+        <div
+          onClick={onCloseMobile}
+          className={`fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 cursor-pointer ${
+            isMobileOpen ? "opacity-100" : "opacity-0"
+          }`}
+        />
 
-          {/* Slide-over Drawer Panel */}
-          <div className="relative w-72 max-w-[80vw] bg-[var(--surface)] border-r border-[var(--border-subtle)] h-full flex flex-col justify-between z-10 animate-in slide-in-from-left duration-200">
+        {/* Slide-over Drawer Panel */}
+        <div
+          className={`relative w-72 max-w-[80vw] bg-[var(--surface)] border-r border-[var(--border-subtle)] h-full flex flex-col justify-between z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+            isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
             <div>
-              {/* Header with Brand and Close - Exact h-16 with border-b */}
-              <div className="h-16 px-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
+              {/* Header with Brand and Close - Clean tonal flow without horizontal divider */}
+              <div className="h-16 px-4 flex items-center justify-between">
                 <Link
                   href="/"
                   title="Return to Home"
@@ -270,7 +280,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                     alt="almost"
                     width={40}
                     height={40}
-                    className="w-10 h-10 rounded-xl border border-[var(--border-subtle)] object-contain transition duration-150 hover:brightness-90"
+                    className="w-10 h-10 rounded-xl object-contain transition duration-150 hover:brightness-90"
                   />
                 </Link>
 
@@ -286,7 +296,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
               <div className="p-5 space-y-4">
                 {/* Mobile User Profile Button (Direct link to /profile, no dropdown) */}
                 <ProfileDropdown
-                  className="w-full justify-start h-11"
+                  className="w-full justify-start h-11 bg-[var(--background)]"
                   showDropdown={false}
                   onOpenAuthModal={onOpenAuthModal}
                   onAction={onCloseMobile}
@@ -304,7 +314,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 {/* Mobile Join Shared Wish */}
                 <button
                   onClick={handleJoinWish}
-                  className="w-full h-10 flex items-center gap-2.5 rounded-xl font-semibold text-xs px-3 bg-[var(--background)] border border-[var(--border-subtle)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                  className="w-full h-10 flex items-center gap-2.5 rounded-xl font-semibold text-xs px-3 bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
                 >
                   <UsersThree size={16} />
                   <span>Join Shared Wish</span>
@@ -317,13 +327,13 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 <div className="pt-2">
                   <button
                     onClick={toggleTheme}
-                    className="w-full h-10 flex items-center justify-between px-3 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] text-xs text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                    className="w-full h-10 flex items-center justify-between px-3 rounded-xl bg-[var(--background)] text-xs text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
                   >
                     <span className="flex items-center gap-2 font-medium">
                       {resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
                       <span>{resolvedTheme === "dark" ? "Light theme" : "Dark theme"}</span>
                     </span>
-                    <span className="text-[10px] uppercase font-semibold text-[var(--muted)]">
+                    <span className="text-[11px] font-medium text-[var(--muted)]">
                       {resolvedTheme === "dark" ? "Switch" : "Switch"}
                     </span>
                   </button>
@@ -335,7 +345,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
             <div className="p-5">
               <div
                 onClick={handleEditSavings}
-                className="p-3.5 rounded-xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] cursor-pointer hover:bg-[var(--surface-hover)] transition"
+                className="p-3.5 rounded-xl bg-[var(--background)] cursor-pointer hover:bg-[var(--surface-hover)] transition"
               >
                 <div className="flex items-center justify-between text-xs text-[var(--muted)]">
                   <span>Total savings</span>
@@ -351,7 +361,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
             </div>
           </div>
         </div>
-      )}
     </>
   );
 });

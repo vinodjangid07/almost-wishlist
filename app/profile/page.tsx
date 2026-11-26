@@ -11,16 +11,21 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import { useSavings } from "@/contexts/SavingsContext";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-import { ProfileDropdown } from "@/components/layout/ProfileDropdown";
 import { AuthModal } from "@/components/modals/AuthModal";
-import { ArrowLeft, Check } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowUpRight, Check } from "@phosphor-icons/react";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const { resolvedTheme } = useTheme();
   const { wishes } = useWishlist();
-  const { currentSavings, currency } = useSavings();
+  const {
+    currentSavings,
+    totalWishlistCost,
+    gap,
+    affordabilityPercent,
+    currency,
+  } = useSavings();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [displayNameInput, setDisplayNameInput] = useState("");
@@ -39,6 +44,9 @@ export default function ProfilePage() {
     resolvedTheme === "dark"
       ? "/light-wordmark-logo.webp"
       : "/dark-wordmark-logo.webp";
+
+  const appIconSrc =
+    resolvedTheme === "dark" ? "/dark-app-icon.webp" : "/light-app-icon.webp";
 
   const userInitial = user?.displayName
     ? user.displayName.charAt(0).toUpperCase()
@@ -84,225 +92,385 @@ export default function ProfilePage() {
   const activeCount = wishes.filter((w) => !w.isFulfilled).length;
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--foreground)] selection:text-[var(--background)] font-sans antialiased">
-      {/* Top Header - Fully responsive, zero crammed text */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-[var(--background)]/85 backdrop-blur-md border-b border-[var(--border-subtle)]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-3">
-          {/* Logo */}
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[var(--foreground)] selection:text-[var(--background)] font-sans antialiased flex flex-col">
+      {/* Unified Seamless Top Rail - Matches Landing grid alignment & Dashboard borderless surfaces */}
+      <header className="fixed top-0 left-0 right-0 z-40 bg-[var(--background)]/85 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 h-16 flex items-center justify-between gap-4">
+          {/* Left: Wordmark identical in proportion to Landing Navbar */}
           <Link
             href="/"
-            className="flex items-center gap-2 group cursor-pointer select-none shrink-0"
-            title="almost"
+            className="flex items-center group cursor-pointer select-none shrink-0"
+            title="almost • home"
           >
             <Image
               src={wordmarkLogo}
               alt="almost"
-              width={100}
-              height={24}
+              width={120}
+              height={28}
               priority
-              className="h-5 sm:h-6 w-auto object-contain"
+              className="h-6 sm:h-7 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
             />
           </Link>
 
-          {/* Controls: Responsive back button + Theme toggle + Desktop Profile */}
+          {/* Right: Borderless Tonal Controls matching Dashboard Header */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <Link
               href="/app"
-              className="h-9 sm:h-10 px-3 sm:px-4 rounded-xl text-xs font-semibold bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="group h-10 px-3.5 sm:px-4 rounded-xl text-xs font-semibold bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--foreground)] transition active:scale-[0.98] flex items-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              <ArrowLeft size={13} weight="bold" />
-              <span className="hidden sm:inline">Back to Dashboard</span>
-              <span className="sm:hidden">Dashboard</span>
+              <ArrowLeft
+                size={13}
+                weight="bold"
+                className="text-[var(--muted)] group-hover:text-[var(--foreground)] group-hover:-translate-x-0.5 transition-all duration-200"
+              />
+              <span className="hidden sm:inline">Back to Wishlist</span>
+              <span className="sm:hidden">Wishlist</span>
             </Link>
 
-            <ThemeToggle className="h-9 w-9 sm:h-10 sm:w-10" />
+            <ThemeToggle />
 
-            {/* Profile Dropdown hidden on mobile to avoid overcrowding on profile page */}
-            <div className="hidden sm:block">
-              <ProfileDropdown onOpenAuthModal={() => setIsAuthModalOpen(true)} />
-            </div>
+            {!loading && !user && (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="h-10 px-4 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer whitespace-nowrap"
+              >
+                Sign in
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="pt-24 sm:pt-28 pb-20 px-4 sm:px-8 max-w-2xl mx-auto space-y-5 sm:space-y-6">
-        {/* Page Heading */}
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-[var(--primary)]">
-            Account &amp; preferences
-          </p>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--foreground)]">
-            Profile settings
-          </h1>
-          <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
-            Manage your personal profile, cloud synchronization, and wishlist registry.
-          </p>
+      {/* Main Architectural Stage */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-28 sm:pt-32 pb-20">
+        {/* Editorial Page Masthead */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-8 sm:pb-12">
+          <div className="lg:col-span-8 space-y-3">
+            <p className="text-xs font-medium text-[var(--muted)]">
+              {user ? `Member since ${memberSince}` : "Personal workspace"}
+            </p>
+            <h1 className="text-[clamp(2.25rem,5vw,4.25rem)] font-bold tracking-[-0.03em] leading-[1.02] text-[var(--foreground)] text-balance">
+              {loading
+                ? "Loading profile."
+                : user
+                ? user.displayName || user.email?.split("@")[0] || "Your account"
+                : "Sign in to sync."}
+            </h1>
+            <p className="text-sm sm:text-base text-[var(--muted)] max-w-xl leading-relaxed">
+              Manage your identity, cloud synchronization, and current savings standing across almost.
+            </p>
+          </div>
+
+          {user && (
+            <div className="lg:col-span-4 flex flex-col lg:items-end justify-end space-y-1">
+              <span className="text-xs font-medium text-[var(--accent-green)]">
+                Cloud Firestore Synced
+              </span>
+              <span className="text-xs text-[var(--muted)] truncate max-w-full">
+                {user.email || "Active session"}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Content Body */}
         {loading ? (
-          <div className="p-8 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] text-center text-xs text-[var(--muted)]">
-            Loading account details...
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 animate-pulse select-none">
+            <div className="lg:col-span-5 rounded-3xl bg-[var(--surface)] h-80 p-7 space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--background)]" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 w-32 rounded bg-[var(--background)]" />
+                  <div className="h-3 w-44 rounded bg-[var(--background)]" />
+                </div>
+              </div>
+              <div className="h-24 rounded-2xl bg-[var(--background)]" />
+              <div className="h-16 rounded-2xl bg-[var(--background)]" />
+            </div>
+            <div className="lg:col-span-7 rounded-3xl bg-[var(--surface)] h-80 p-7 space-y-6">
+              <div className="h-3 w-28 rounded bg-[var(--background)]" />
+              <div className="h-12 w-52 rounded bg-[var(--background)]" />
+              <div className="grid grid-cols-3 gap-3">
+                <div className="h-24 rounded-2xl bg-[var(--background)]" />
+                <div className="h-24 rounded-2xl bg-[var(--background)]" />
+                <div className="h-24 rounded-2xl bg-[var(--background)]" />
+              </div>
+            </div>
           </div>
         ) : user ? (
-          <div className="space-y-4">
-            {/* Card 1: Personal Details */}
-            <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] p-4 sm:p-6 space-y-4 sm:space-y-5">
-              {/* Avatar + Name Row (Bulletproof responsive flex) */}
-              <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
-                <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
-                  <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl overflow-hidden bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-base sm:text-lg font-bold shrink-0">
-                    {user.photoURL && !avatarError ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={user.photoURL}
-                        alt=""
-                        referrerPolicy="no-referrer"
-                        onError={() => setAvatarError(true)}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span>{userInitial}</span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm sm:text-base text-[var(--foreground)] truncate">
-                        {user.displayName || "Account"}
-                      </span>
-                      {nameSuccess && (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-[var(--accent-green)] font-medium shrink-0">
-                          <Check size={11} weight="bold" />
-                          <span>Saved</span>
-                        </span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch">
+            {/* Left Wing (5 cols): Identity & Session Slab */}
+            <section className="lg:col-span-5 rounded-3xl bg-[var(--surface)] p-6 sm:p-8 flex flex-col justify-between gap-7">
+              <div className="space-y-6">
+                {/* Identity Row */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden bg-[var(--background)] flex items-center justify-center text-lg sm:text-xl font-bold text-[var(--foreground)] shrink-0">
+                      {user.photoURL && !avatarError ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={user.photoURL}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          onError={() => setAvatarError(true)}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{userInitial}</span>
                       )}
                     </div>
-                    <span className="text-xs text-[var(--muted)] block truncate">
-                      {user.email || "Active User"}
+
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-semibold text-base sm:text-lg text-[var(--foreground)] truncate">
+                          {user.displayName || "Account"}
+                        </h2>
+                        {nameSuccess && (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-[var(--accent-green)] font-medium shrink-0">
+                            <Check size={11} weight="bold" />
+                            <span>Saved</span>
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[var(--muted)] truncate">
+                        {user.email || "Active user"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!isEditingName && (
+                    <button
+                      onClick={() => setIsEditingName(true)}
+                      className="h-9 px-3.5 rounded-xl bg-[var(--background)] hover:bg-[var(--surface-hover)] text-xs font-medium text-[var(--foreground)] transition active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap"
+                    >
+                      Edit name
+                    </button>
+                  )}
+                </div>
+
+                {/* Inline Display Name Form */}
+                {isEditingName && (
+                  <form
+                    onSubmit={handleSaveDisplayName}
+                    className="p-4 rounded-2xl bg-[var(--background)] space-y-3"
+                  >
+                    <label
+                      htmlFor="profile-display-name"
+                      className="text-xs font-medium text-[var(--muted)] block"
+                    >
+                      Display name
+                    </label>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <input
+                        id="profile-display-name"
+                        type="text"
+                        value={displayNameInput}
+                        onChange={(e) => setDisplayNameInput(e.target.value)}
+                        placeholder="Enter display name"
+                        className="flex-1 h-10 px-3.5 rounded-xl bg-[var(--surface)] text-xs font-medium text-[var(--foreground)] placeholder:text-[var(--placeholder)] outline-none focus:ring-1 focus:ring-[var(--border-subtle)] transition"
+                        autoFocus
+                        required
+                      />
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <button
+                          type="submit"
+                          disabled={isUpdatingName}
+                          className="h-10 px-4 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                        >
+                          {isUpdatingName ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingName(false)}
+                          className="h-10 px-3 rounded-xl text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)] transition cursor-pointer whitespace-nowrap"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                {/* Recessed Account Metadata Pockets */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
+                  <div className="rounded-2xl bg-[var(--background)] p-4 space-y-1">
+                    <span className="text-[11px] text-[var(--muted)] block">
+                      Member since
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-[var(--foreground)] block">
+                      {memberSince}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl bg-[var(--background)] p-4 space-y-1">
+                    <span className="text-[11px] text-[var(--muted)] block">
+                      Sync security
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-[var(--accent-green)] block">
+                      Cloud Firestore Synced
                     </span>
                   </div>
                 </div>
+              </div>
 
-                {!isEditingName && (
-                  <button
-                    onClick={() => setIsEditingName(true)}
-                    className="h-8.5 px-3.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] text-xs font-medium text-[var(--foreground)] transition cursor-pointer shrink-0 whitespace-nowrap"
+              {/* Integrated Session Control Footer */}
+              <div className="rounded-2xl bg-[var(--background)] p-4 sm:p-5 flex items-center justify-between gap-4">
+                <div className="min-w-0 space-y-0.5">
+                  <span className="text-xs font-semibold text-[var(--foreground)] block">
+                    Session
+                  </span>
+                  <span className="text-[11px] text-[var(--muted)] block truncate sm:whitespace-normal">
+                    Sign out of your account on this device.
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleSignOut}
+                  className="h-9 px-4 rounded-xl text-xs font-semibold bg-[var(--surface)] text-[var(--danger)] hover:bg-[var(--danger-bg)] transition active:scale-[0.98] cursor-pointer shrink-0 whitespace-nowrap"
+                >
+                  Sign out
+                </button>
+              </div>
+            </section>
+
+            {/* Right Wing (7 cols): Savings & Wishlist Standing Slab */}
+            <section className="lg:col-span-7 rounded-3xl bg-[var(--surface)] overflow-hidden flex flex-col justify-between">
+              <div className="p-6 sm:p-8 space-y-8">
+                {/* Header & Direct Return CTA */}
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-medium text-[var(--muted)]">
+                    Wishlist overview
+                  </span>
+
+                  <Link
+                    href="/app"
+                    className="group inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)] hover:text-[var(--primary)] transition-colors cursor-pointer"
                   >
-                    Edit Name
-                  </button>
-                )}
-              </div>
+                    <span>Open wishlist</span>
+                    <ArrowUpRight
+                      size={14}
+                      weight="bold"
+                      className="text-[var(--muted)] group-hover:text-[var(--primary)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200"
+                    />
+                  </Link>
+                </div>
 
-              {/* Inline Edit Name Form */}
-              {isEditingName && (
-                <form onSubmit={handleSaveDisplayName} className="pt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <input
-                    type="text"
-                    value={displayNameInput}
-                    onChange={(e) => setDisplayNameInput(e.target.value)}
-                    placeholder="Enter display name"
-                    className="flex-1 h-9 px-3 rounded-lg bg-[var(--background)] border border-[var(--border-subtle)] text-xs text-[var(--foreground)] outline-none focus:border-[var(--primary)]"
-                    autoFocus
-                    required
-                  />
-                  <div className="flex items-center gap-2 self-end sm:self-auto">
-                    <button
-                      type="submit"
-                      disabled={isUpdatingName}
-                      className="h-9 px-3.5 rounded-lg text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition cursor-pointer disabled:opacity-50 whitespace-nowrap"
-                    >
-                      {isUpdatingName ? "Saving..." : "Save"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingName(false)}
-                      className="h-9 px-3 rounded-lg text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition cursor-pointer whitespace-nowrap"
-                    >
-                      Cancel
-                    </button>
+                {/* Primary Hero Savings Metric */}
+                <div className="space-y-2.5">
+                  <span className="text-xs font-medium text-[var(--muted)] block">
+                    Total savings
+                  </span>
+                  <div
+                    suppressHydrationWarning
+                    className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold tracking-[-0.035em] tabular-nums leading-none text-[var(--foreground)]"
+                  >
+                    {currency}
+                    {currentSavings.toLocaleString("en-IN")}
                   </div>
-                </form>
-              )}
-
-              {/* Metadata Sub-grid */}
-              <div className="pt-3.5 border-t border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-[11px] text-[var(--muted)] block">Member since</span>
-                  <span className="font-medium text-[var(--foreground)] text-xs mt-0.5 block">{memberSince}</span>
+                  <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
+                    {totalWishlistCost > 0
+                      ? `Measured against ${currency}${totalWishlistCost.toLocaleString("en-IN")} across your active wishlist.`
+                      : "Your live balance sits beside every item you add to almost."}
+                  </p>
                 </div>
-                <div>
-                  <span className="text-[11px] text-[var(--muted)] block">Sync security</span>
-                  <span className="font-medium text-[var(--accent-green)] text-xs mt-0.5 block">Cloud Firestore Synced</span>
+
+                {/* Three Recessed Standing Tiles */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="rounded-2xl bg-[var(--background)] p-4 sm:p-5 space-y-2">
+                    <span className="text-[11px] font-medium text-[var(--muted)] block">
+                      Active wishes
+                    </span>
+                    <span className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums text-[var(--foreground)] block leading-none">
+                      {activeCount}
+                    </span>
+                    <span className="text-[11px] text-[var(--muted)] block">
+                      {activeCount === 1 ? "Item in queue" : "Items in queue"}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl bg-[var(--background)] p-4 sm:p-5 space-y-2">
+                    <span className="text-[11px] font-medium text-[var(--muted)] block">
+                      Fulfilled
+                    </span>
+                    <span className="text-2xl sm:text-3xl font-bold tracking-tight tabular-nums text-[var(--accent-green)] block leading-none">
+                      {fulfilledCount}
+                    </span>
+                    <span className="text-[11px] text-[var(--muted)] block">
+                      {fulfilledCount === 1 ? "Completed wish" : "Completed wishes"}
+                    </span>
+                  </div>
+
+                  <div className="rounded-2xl bg-[var(--background)] p-4 sm:p-5 space-y-2">
+                    <span className="text-[11px] font-medium text-[var(--muted)] block">
+                      Remaining gap
+                    </span>
+                    <span
+                      suppressHydrationWarning
+                      className={`text-2xl sm:text-3xl font-bold tracking-tight tabular-nums block leading-none ${
+                        gap === 0 && totalWishlistCost > 0
+                          ? "text-[var(--accent-green)]"
+                          : "text-[var(--foreground)]"
+                      }`}
+                    >
+                      {gap === 0 && totalWishlistCost > 0
+                        ? `${currency}0`
+                        : `${currency}${gap.toLocaleString("en-IN")}`}
+                    </span>
+                    <span className="text-[11px] text-[var(--muted)] block">
+                      {gap === 0 && totalWishlistCost > 0
+                        ? "Fully covered"
+                        : "Until everything is funded"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Card 2: Registry Summary (Responsive Grid: 2 cols on mobile, 3 on tablet/desktop) */}
-            <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] p-4 sm:p-6 space-y-3.5 sm:space-y-4">
-              <span className="text-xs font-semibold text-[var(--foreground)] block">
-                Registry summary
-              </span>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4 text-left">
-                <div>
-                  <span className="text-[11px] text-[var(--muted)] block">Active wishes</span>
-                  <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)] block mt-0.5">
-                    {activeCount}
+              {/* Calibrated Readiness Horizon Bar - Matches BentoDashboard & Landing */}
+              <div>
+                <div className="px-6 sm:px-8 py-4 bg-[var(--background)]/50 flex items-center justify-between gap-4 text-xs">
+                  <span className="text-[var(--muted)] font-medium">
+                    Wishlist coverage
+                  </span>
+                  <span className="tabular-nums font-semibold text-[var(--primary)]">
+                    {affordabilityPercent}%
                   </span>
                 </div>
-
-                <div>
-                  <span className="text-[11px] text-[var(--muted)] block">Fulfilled</span>
-                  <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--accent-green)] block mt-0.5">
-                    {fulfilledCount}
-                  </span>
-                </div>
-
-                <div className="col-span-2 sm:col-span-1 pt-2 sm:pt-0 border-t sm:border-t-0 border-[var(--border-subtle)]">
-                  <span className="text-[11px] text-[var(--muted)] block">Total savings</span>
-                  <span className="text-xl sm:text-2xl font-bold tabular-nums text-[var(--foreground)] block mt-0.5 whitespace-nowrap">
-                    {currency}{currentSavings.toLocaleString("en-IN")}
-                  </span>
+                <div className="h-[2px] w-full bg-[var(--surface-raised)]">
+                  <div
+                    className="h-full bg-[var(--primary)] transition-all duration-500"
+                    style={{ width: `${Math.min(100, affordabilityPercent)}%` }}
+                  />
                 </div>
               </div>
-            </div>
-
-            {/* Card 3: Session Management */}
-            <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] p-4 sm:p-6 flex items-center justify-between gap-3 sm:gap-4">
-              <div className="min-w-0">
-                <span className="text-xs font-semibold text-[var(--foreground)] block">Session</span>
-                <span className="text-[11px] text-[var(--muted)] block mt-0.5 truncate sm:whitespace-normal">
-                  Sign out of your account on this device.
-                </span>
-              </div>
-
-              <button
-                onClick={handleSignOut}
-                className="h-8.5 px-3.5 rounded-lg text-xs font-semibold text-[var(--danger)] hover:bg-[var(--danger-bg)] border border-[var(--border-subtle)] transition cursor-pointer shrink-0 whitespace-nowrap"
-              >
-                Sign Out
-              </button>
-            </div>
+            </section>
           </div>
         ) : (
-          /* Unauthenticated State */
-          <div className="p-6 sm:p-10 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] text-center space-y-4">
-            <div className="space-y-1 max-w-sm mx-auto">
-              <h2 className="text-base font-semibold text-[var(--foreground)]">
-                Authentication Required
-              </h2>
-              <p className="text-xs text-[var(--muted)] leading-relaxed">
-                Connect your account to sync your wishes across devices and manage your savings goals.
-              </p>
+          /* Unauthenticated Editorial Card */
+          <div className="rounded-3xl bg-[var(--surface)] p-8 sm:p-12 lg:p-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-8 space-y-4">
+              <Image
+                src={appIconSrc}
+                alt="almost"
+                width={56}
+                height={56}
+                className="w-14 h-14 rounded-2xl object-contain"
+              />
+              <div className="space-y-2">
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-[var(--foreground)]">
+                  Keep your wishlist synchronized.
+                </h2>
+                <p className="text-xs sm:text-sm text-[var(--muted)] max-w-md leading-relaxed">
+                  Connect your account to save your wishlist, update your live savings balance, and collaborate on shared goals across every device.
+                </p>
+              </div>
             </div>
 
-            <div className="pt-2 flex justify-center">
+            <div className="lg:col-span-4 flex lg:justify-end">
               <button
                 onClick={() => setIsAuthModalOpen(true)}
-                className="h-10 px-6 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition cursor-pointer"
+                className="h-11 px-6 rounded-xl text-xs sm:text-sm font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition active:scale-[0.98] cursor-pointer whitespace-nowrap"
               >
-                Sign In
+                Sign in to continue
               </button>
             </div>
           </div>

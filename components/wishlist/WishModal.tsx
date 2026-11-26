@@ -301,43 +301,38 @@ export const WishModal: React.FC<WishModalProps> = ({
           opacity: dragOffset > 0 ? Math.max(0.5, 1 - dragOffset / 300) : undefined,
           transition: dragOffset === 0 ? "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease" : "none",
         }}
-        className="relative w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[92vh] bg-[var(--surface)] border-0 sm:border sm:border-[var(--border-subtle)] rounded-none sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col my-0 sm:my-4 animate-in zoom-in-95 duration-150"
+        className="relative w-full sm:max-w-xl h-full sm:h-auto sm:max-h-[92vh] bg-[var(--surface)] border-0 sm:border sm:border-[var(--border-subtle)] rounded-none sm:rounded-2xl shadow-sm overflow-hidden flex flex-col my-0 sm:my-4"
       >
-        {/* Header */}
-        <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-[var(--border-subtle)] flex items-center justify-between shrink-0 bg-[var(--surface)]">
-          <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
+        {/* Header (No divider, no ESC mono pill) */}
+        <div className="px-5 sm:px-6 pt-5 pb-3 flex items-center justify-between shrink-0 bg-[var(--surface)]">
+          <h2 className="text-base font-semibold tracking-tight text-[var(--foreground)]">
             {wishToEdit ? "Edit Wish" : "New Wish"}
           </h2>
 
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--muted)]">
-              ESC
-            </span>
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-              title="Close modal"
-            >
-              <X size={15} />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition cursor-pointer"
+            title="Close modal"
+          >
+            <X size={16} />
+          </button>
         </div>
 
         {/* Scrollable Form Body */}
         <form
           id="wish-modal-form"
           onSubmit={handleSubmit}
-          className="p-5 sm:p-6 space-y-6 overflow-y-auto flex-1 select-text"
+          className="px-5 sm:px-6 pt-2 pb-6 space-y-5 overflow-y-auto flex-1 select-text"
         >
-          {/* Cover Photo / Media Zone */}
+          {/* Cover Photo / Media Zone (Clean recessed surface, no dashed box slop) */}
           <div>
             {imagePreview ? (
-              <div className="relative w-full h-36 sm:h-44 rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--surface-raised)] group">
+              <div className="relative w-full h-40 sm:h-44 rounded-xl overflow-hidden bg-[var(--background)] group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
                   alt="Preview"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02] mix-blend-multiply dark:mix-blend-normal"
                 />
 
                 {/* Mobile Persistent Action Controls (Always visible on mobile touch screens, zero hover needed) */}
@@ -345,7 +340,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-7 px-2.5 rounded-lg bg-black/75 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 cursor-pointer active:scale-95 shadow-sm"
+                    className="h-7 px-2.5 rounded-lg bg-black/75 backdrop-blur-md text-white text-[11px] font-medium flex items-center gap-1 cursor-pointer active:scale-95"
                   >
                     <UploadSimple size={12} />
                     <span>Change</span>
@@ -356,7 +351,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                       setImageFile(null);
                       setImagePreview("");
                     }}
-                    className="h-7 px-2.5 rounded-lg bg-black/75 backdrop-blur-md text-rose-300 text-[11px] font-medium flex items-center gap-1 cursor-pointer active:scale-95 shadow-sm"
+                    className="h-7 px-2.5 rounded-lg bg-black/75 backdrop-blur-md text-rose-300 text-[11px] font-medium flex items-center gap-1 cursor-pointer active:scale-95"
                   >
                     <Trash size={12} />
                     <span>Remove</span>
@@ -387,10 +382,10 @@ export const WishModal: React.FC<WishModalProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-[var(--border-subtle)] hover:border-[var(--muted)] p-3.5 bg-[var(--background)]/35 transition space-y-3">
+              <div className="rounded-xl p-3.5 bg-[var(--background)] transition space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-8.5 h-8.5 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--muted)] shrink-0">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-[var(--surface)] flex items-center justify-center text-[var(--muted)] shrink-0">
                       <UploadSimple size={15} />
                     </div>
                     <div className="min-w-0">
@@ -407,14 +402,14 @@ export const WishModal: React.FC<WishModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowUrlInput(!showUrlInput)}
-                      className="flex-1 sm:flex-initial h-8 sm:h-7 px-3 rounded-lg border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs sm:text-[11px] font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition cursor-pointer text-center whitespace-nowrap"
+                      className="flex-1 sm:flex-initial h-8 px-3 rounded-lg bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-xs sm:text-[11px] font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition cursor-pointer text-center whitespace-nowrap"
                     >
                       {showUrlInput ? "Hide Link" : "Paste URL"}
                     </button>
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex-1 sm:flex-initial h-8 sm:h-7 px-3.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] text-xs sm:text-[11px] font-semibold hover:opacity-90 transition cursor-pointer text-center whitespace-nowrap"
+                      className="flex-1 sm:flex-initial h-8 px-3.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] text-xs sm:text-[11px] font-semibold hover:opacity-90 transition cursor-pointer text-center whitespace-nowrap"
                     >
                       Browse
                     </button>
@@ -438,7 +433,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                         setImageFile(null);
                         setImagePreview(e.target.value);
                       }}
-                      className="h-8.5 w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-lg px-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:border-[var(--muted)] transition"
+                      className="h-9 w-full bg-[var(--surface)] rounded-lg px-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--muted)]/40 transition"
                       autoFocus
                     />
                   </div>
@@ -461,27 +456,45 @@ export const WishModal: React.FC<WishModalProps> = ({
             )}
           </div>
 
-          {/* Editorial Title & Notes (Clean & Borderless) */}
-          <div className="space-y-1.5 pb-1">
-            <input
-              type="text"
-              required
-              placeholder="What are you wishing for?"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full text-lg sm:text-xl font-bold tracking-tight text-[var(--foreground)] placeholder:text-[var(--placeholder)] bg-transparent border-0 border-b border-transparent focus:border-[var(--border-subtle)] pb-1.5 focus:outline-none transition"
-            />
+          {/* Product Title & Notes (Clear, tactile dashboard-matched recessed inputs — never missed) */}
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="wish-title-input"
+                className="text-xs font-medium text-[var(--muted)] block"
+              >
+                Wish Name *
+              </label>
+              <input
+                id="wish-title-input"
+                type="text"
+                required
+                placeholder="e.g., Leica Q3 Camera, Kyoto Trip, Aeron Chair..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full h-11 px-3.5 rounded-xl bg-[var(--background)] text-sm sm:text-base font-semibold tracking-tight text-[var(--foreground)] placeholder:text-[var(--placeholder)] placeholder:font-normal focus:outline-none focus:ring-1 focus:ring-[var(--primary)]/50 transition"
+              />
+            </div>
 
-            <textarea
-              rows={2}
-              placeholder="Why does this matter? Add personal notes, specifications, or wait conditions..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full text-xs sm:text-sm text-[var(--foreground)] placeholder:text-[var(--placeholder)] bg-transparent border-0 focus:outline-none resize-none leading-relaxed min-h-[44px]"
-            />
+            <div className="space-y-1.5">
+              <label
+                htmlFor="wish-notes-input"
+                className="text-xs font-medium text-[var(--muted)] block"
+              >
+                Notes
+              </label>
+              <textarea
+                id="wish-notes-input"
+                rows={2}
+                placeholder="Specifications, reason, or conditions before buying..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--background)] text-xs sm:text-sm text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--muted)]/40 resize-none leading-relaxed min-h-[60px] transition"
+              />
+            </div>
           </div>
 
-          {/* Properties: Classification, Priority, Category (Clean Unified Grid, No Outer Card Wrapper) */}
+          {/* Properties: Classification, Priority, Category (Unified borderless recessed surfaces) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Classification */}
             <div className="space-y-1.5">
@@ -492,14 +505,14 @@ export const WishModal: React.FC<WishModalProps> = ({
                 <select
                   value={tag}
                   onChange={(e) => setTag(e.target.value as TagType)}
-                  className="w-full h-9.5 appearance-none bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl pl-3 pr-8 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer transition capitalize"
+                  className="w-full h-10 appearance-none bg-[var(--background)] hover:bg-[var(--surface-raised)]/70 rounded-xl pl-3.5 pr-8 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer transition capitalize"
                 >
                   <option value="need">Need</option>
                   <option value="want">Want</option>
                   <option value="luxury">Luxury</option>
                 </select>
                 <CaretDown
-                  size={12}
+                  size={11}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
                 />
               </div>
@@ -514,14 +527,14 @@ export const WishModal: React.FC<WishModalProps> = ({
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as PriorityLevel)}
-                  className="w-full h-9.5 appearance-none bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl pl-3 pr-8 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer transition"
+                  className="w-full h-10 appearance-none bg-[var(--background)] hover:bg-[var(--surface-raised)]/70 rounded-xl pl-3.5 pr-8 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer transition"
                 >
                   <option value="high">High priority</option>
                   <option value="medium">Medium priority</option>
                   <option value="low">Low priority</option>
                 </select>
                 <CaretDown
-                  size={12}
+                  size={11}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
                 />
               </div>
@@ -536,7 +549,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full h-9.5 appearance-none bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] rounded-xl pl-3 pr-8 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer transition truncate"
+                  className="w-full h-10 appearance-none bg-[var(--background)] hover:bg-[var(--surface-raised)]/70 rounded-xl pl-3.5 pr-8 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer transition truncate"
                 >
                   {DEFAULT_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
@@ -545,7 +558,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                   ))}
                 </select>
                 <CaretDown
-                  size={12}
+                  size={11}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none"
                 />
               </div>
@@ -554,18 +567,18 @@ export const WishModal: React.FC<WishModalProps> = ({
 
           {/* Custom Category Field if "Other" is chosen */}
           {category === "Other" && (
-            <div className="animate-in fade-in duration-150">
+            <div>
               <input
                 type="text"
                 placeholder="Enter custom category..."
                 value={customCategory}
                 onChange={(e) => setCustomCategory(e.target.value)}
-                className="h-9 w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl px-3 text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--muted)] transition"
+                className="h-10 w-full bg-[var(--background)] rounded-xl px-3.5 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--muted)]/40 transition"
               />
             </div>
           )}
 
-          {/* Valuation & Target Budgeting (Clean Direct Field, No Outer Card Wrapper) */}
+          {/* Valuation & Target Budgeting (Borderless recessed surface) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-medium text-[var(--muted)]">
@@ -580,7 +593,7 @@ export const WishModal: React.FC<WishModalProps> = ({
               </button>
             </div>
 
-            <div className="flex items-center gap-2 h-11 px-3.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--surface)] focus-within:border-[var(--muted)] transition">
+            <div className="flex items-center gap-2 h-11 px-3.5 rounded-xl bg-[var(--background)] focus-within:ring-1 focus-within:ring-[var(--primary)]/50 transition">
               <span className="text-sm font-semibold text-[var(--muted)] select-none">
                 {currency}
               </span>
@@ -592,12 +605,12 @@ export const WishModal: React.FC<WishModalProps> = ({
                 placeholder="0.00"
                 value={estimatedPrice}
                 onChange={(e) => setEstimatedPrice(e.target.value)}
-                className="w-full text-base font-bold tabular-nums font-mono text-[var(--foreground)] placeholder:text-[var(--placeholder)] bg-transparent border-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full text-base font-bold tabular-nums text-[var(--foreground)] placeholder:text-[var(--placeholder)] bg-transparent border-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
 
             {showPriceRange && (
-              <div className="grid grid-cols-2 gap-2.5 pt-1.5 animate-in fade-in duration-150">
+              <div className="grid grid-cols-2 gap-2.5 pt-1.5">
                 <div className="space-y-1">
                   <label className="text-[11px] font-medium text-[var(--muted)]">
                     Min Price ({currency})
@@ -608,7 +621,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                     placeholder="Min"
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
-                    className="h-9 w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl px-2.5 text-xs font-mono tabular-nums text-[var(--foreground)] focus:outline-none focus:border-[var(--muted)] transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="h-9.5 w-full bg-[var(--background)] rounded-xl px-3 text-xs tabular-nums font-medium text-[var(--foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--muted)]/40 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-1">
@@ -621,31 +634,31 @@ export const WishModal: React.FC<WishModalProps> = ({
                     placeholder="Max"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
-                    className="h-9 w-full bg-[var(--surface)] border border-[var(--border-subtle)] rounded-xl px-2.5 text-xs font-mono tabular-nums text-[var(--foreground)] focus:outline-none focus:border-[var(--muted)] transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="h-9.5 w-full bg-[var(--background)] rounded-xl px-3 text-xs tabular-nums font-medium text-[var(--foreground)] focus:outline-none focus:ring-1 focus:ring-[var(--muted)]/40 transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Collaborative Wish (With strict authentication gate) */}
+          {/* Collaborative Wish (Clean recessed surface toggle row, zero border box) */}
           <div
             onClick={handleToggleCollab}
-            className={`p-3.5 rounded-xl border border-[var(--border-subtle)] transition flex items-center justify-between gap-3 cursor-pointer select-none ${
+            className={`p-3.5 rounded-xl transition flex items-center justify-between gap-3 cursor-pointer select-none ${
               isShared
-                ? "bg-[var(--surface-raised)]/70 border-[var(--primary)]/40"
-                : "bg-[var(--background)]/40 hover:bg-[var(--surface-hover)]/30"
+                ? "bg-[var(--primary)]/10"
+                : "bg-[var(--background)] hover:bg-[var(--surface-raised)]/65"
             }`}
           >
             <div className="flex items-center gap-3">
               <div
-                className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition ${
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition ${
                   isShared
                     ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
-                    : "bg-[var(--surface-raised)] text-[var(--muted)] border border-[var(--border-subtle)]"
+                    : "bg-[var(--surface)] text-[var(--muted)]"
                 }`}
               >
-                <UsersThree size={18} />
+                <UsersThree size={17} />
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
@@ -653,7 +666,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                     Collaborative Wish
                   </span>
                   {!user && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--primary)] bg-[var(--primary)]/10 px-2 py-0.5 rounded-md">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--primary)]">
                       <LockKey size={10} />
                       Sign in required
                     </span>
@@ -672,17 +685,17 @@ export const WishModal: React.FC<WishModalProps> = ({
               }`}
             >
               <div
-                className={`w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
+                className={`w-4 h-4 rounded-full bg-white transition-transform ${
                   isShared ? "translate-x-4" : "translate-x-0"
                 }`}
               />
             </div>
           </div>
 
-          {/* Store Comparison Links */}
+          {/* Store Comparison Links (Borderless recessed blocks) */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-[var(--foreground)]">
+              <span className="text-xs font-medium text-[var(--muted)]">
                 Store Links
               </span>
               <button
@@ -699,7 +712,7 @@ export const WishModal: React.FC<WishModalProps> = ({
               {links.map((link, idx) => (
                 <div
                   key={link.id || idx}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--background)]/30"
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2 rounded-xl bg-[var(--background)]"
                 >
                   <div className="flex items-center gap-2">
                     <select
@@ -707,7 +720,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                       onChange={(e) =>
                         handleUpdateLink(link.id, { storeName: e.target.value })
                       }
-                      className="h-8 w-28 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-lg px-2 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer shrink-0"
+                      className="h-8.5 w-28 bg-[var(--surface)] rounded-lg px-2.5 text-xs font-medium text-[var(--foreground)] focus:outline-none cursor-pointer shrink-0"
                     >
                       {COMMON_STORES.map((s) => (
                         <option key={s} value={s}>
@@ -725,7 +738,7 @@ export const WishModal: React.FC<WishModalProps> = ({
                           price: e.target.value ? parseFloat(e.target.value) : undefined,
                         })
                       }
-                      className="h-8 w-24 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-lg px-2 text-xs font-mono tabular-nums text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shrink-0"
+                      className="h-8.5 w-24 bg-[var(--surface)] rounded-lg px-2.5 text-xs tabular-nums font-medium text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none shrink-0"
                     />
                   </div>
 
@@ -737,14 +750,14 @@ export const WishModal: React.FC<WishModalProps> = ({
                       onChange={(e) =>
                         handleUpdateLink(link.id, { url: e.target.value })
                       }
-                      className="h-8 w-full flex-1 bg-[var(--surface)] border border-[var(--border-subtle)] rounded-lg px-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:border-[var(--muted)] transition min-w-0"
+                      className="h-8.5 w-full flex-1 bg-[var(--surface)] rounded-lg px-2.5 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none focus:ring-1 focus:ring-[var(--muted)]/40 transition min-w-0"
                     />
 
                     {links.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveLink(link.id)}
-                        className="h-8 w-8 flex items-center justify-center text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] rounded-lg transition cursor-pointer shrink-0"
+                        className="h-8.5 w-8.5 flex items-center justify-center text-[var(--muted)] hover:text-[var(--danger)] hover:bg-[var(--surface-hover)] rounded-lg transition cursor-pointer shrink-0"
                         title="Remove link"
                       >
                         <Trash size={14} />
@@ -757,12 +770,12 @@ export const WishModal: React.FC<WishModalProps> = ({
           </div>
         </form>
 
-        {/* Pinned Sticky Footer */}
-        <div className="px-5 sm:px-6 py-3.5 border-t border-[var(--border-subtle)] bg-[var(--surface)]/95 backdrop-blur-md flex items-center justify-end gap-2 shrink-0">
+        {/* Pinned Sticky Footer (Seamless without divider or drop shadow) */}
+        <div className="px-5 sm:px-6 py-4 bg-[var(--surface)] flex items-center justify-end gap-2 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="h-9 px-4 rounded-xl text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+            className="h-9.5 px-4 rounded-xl text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--background)] transition cursor-pointer"
           >
             Cancel
           </button>
@@ -770,7 +783,7 @@ export const WishModal: React.FC<WishModalProps> = ({
             type="submit"
             form="wish-modal-form"
             disabled={isSubmitting || !title.trim() || !estimatedPrice}
-            className="h-9 px-5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5 shadow-xs"
+            className="h-9.5 px-5 rounded-xl text-xs font-semibold bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)] transition disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
           >
             {isSubmitting ? (
               <span>Saving...</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { WishItem } from "@/types";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { BentoDashboard } from "@/components/dashboard/BentoDashboard";
@@ -24,6 +24,19 @@ export default function WishlistApp() {
   const [activeTab, setActiveTab] = useState<"wishlist" | "analytics">("wishlist");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Tablet screens (md < lg): shrink sidebar to icon rail by default; expanded on desktop (lg+)
+  useEffect(() => {
+    const tabletQuery = window.matchMedia("(min-width: 768px) and (max-width: 1023px)");
+    if (tabletQuery.matches) {
+      setIsSidebarCollapsed(true);
+    }
+    const handleBreakpoint = (e: MediaQueryListEvent) => {
+      setIsSidebarCollapsed(e.matches);
+    };
+    tabletQuery.addEventListener("change", handleBreakpoint);
+    return () => tabletQuery.removeEventListener("change", handleBreakpoint);
+  }, []);
   const { currentSavings, totalWishlistCost, gap, affordabilityPercent, currency } = useSavings();
   const { wishes, searchQuery, setSearchQuery } = useWishlist();
   const { user } = useAuth();
@@ -115,13 +128,13 @@ export default function WishlistApp() {
 
       {/* Main Content Column with Fixed Top Header and Scrollable Canvas */}
       <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
-        {/* Global Top Command Header - Sits directly flush to edges, never scrolls, zero gap */}
-        <header className="w-full h-16 px-3 sm:px-6 lg:px-7 bg-[var(--surface)] border-b border-[var(--border-subtle)] flex items-center justify-between gap-2.5 sm:gap-3 select-none shrink-0 z-30">
+        {/* Global Top Command Header - Clean tonal separation, zero box borders */}
+        <header className="w-full h-16 px-3 sm:px-6 lg:px-7 bg-[var(--surface)] flex items-center justify-between gap-2.5 sm:gap-3 select-none shrink-0 z-30">
           {/* Left: Mobile Menu Toggle + Search Bar */}
           <div className="flex items-center gap-2 flex-1 max-w-xs sm:max-w-sm">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer shrink-0"
+              className="md:hidden h-10 w-10 flex items-center justify-center rounded-xl bg-[var(--background)] text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition cursor-pointer shrink-0"
               title="Open menu"
             >
               <List size={18} weight="bold" />
@@ -138,7 +151,7 @@ export default function WishlistApp() {
                 placeholder="Search wishes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] focus:bg-[var(--surface)] focus:border-[var(--muted)] rounded-xl pl-9 pr-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition"
+                className="w-full h-10 bg-[var(--background)] hover:bg-[var(--surface-hover)] focus:bg-[var(--background)] focus:ring-1 focus:ring-[var(--border-subtle)] rounded-xl pl-9 pr-3 text-xs text-[var(--foreground)] placeholder:text-[var(--placeholder)] focus:outline-none transition"
               />
             </div>
           </div>
@@ -147,8 +160,9 @@ export default function WishlistApp() {
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Theme Toggle & Profile Button (Direct link to /profile, no dropdown) */}
             <div className="hidden md:flex items-center gap-2 sm:gap-2.5">
-              <ThemeToggle />
+              <ThemeToggle className="bg-[var(--background)]" />
               <ProfileDropdown
+                className="bg-[var(--background)]"
                 showDropdown={false}
                 onOpenAuthModal={() => setIsAuthModalOpen(true)}
               />
@@ -157,7 +171,7 @@ export default function WishlistApp() {
             {/* Join Shared Wish CTA (Desktop only - mobile accessible inside drawer) */}
             <button
               onClick={handleOpenJoinWish}
-              className="hidden md:flex h-10 px-3.5 rounded-xl bg-[var(--background)] border border-[var(--border-subtle)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--foreground)] items-center gap-1.5 transition cursor-pointer shrink-0"
+              className="hidden md:flex h-10 px-3.5 rounded-xl bg-[var(--background)] hover:bg-[var(--surface-hover)] text-xs font-semibold text-[var(--foreground)] items-center gap-1.5 transition cursor-pointer shrink-0"
               title="Join a shared wish with invite code"
             >
               <UsersThree size={15} />

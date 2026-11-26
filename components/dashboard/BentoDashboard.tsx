@@ -3,7 +3,6 @@
 import React, { useMemo } from "react";
 import { useSavings } from "@/contexts/SavingsContext";
 import { useWishlist } from "@/contexts/WishlistContext";
-import { PencilSimple } from "@phosphor-icons/react";
 
 interface BentoDashboardProps {
   onOpenEditSavings: () => void;
@@ -39,12 +38,12 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = React.memo(({
 
   if (loading && wishes.length === 0 && currentSavings === 0) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 select-none animate-pulse">
+      <div className="rounded-2xl bg-[var(--surface)] grid grid-cols-2 lg:grid-cols-4 gap-6 p-6 sm:p-7 select-none animate-pulse">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] space-y-2">
+          <div key={i} className="space-y-3">
             <div className="h-3 w-16 bg-[var(--surface-raised)] rounded" />
-            <div className="h-6 w-24 bg-[var(--surface-raised)] rounded" />
-            <div className="h-2 w-full bg-[var(--surface-raised)] rounded" />
+            <div className="h-7 w-28 bg-[var(--surface-raised)] rounded" />
+            <div className="h-2.5 w-20 bg-[var(--surface-raised)] rounded" />
           </div>
         ))}
       </div>
@@ -52,94 +51,103 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = React.memo(({
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 select-none">
-      {/* 1: Savings */}
-      <div
-        onClick={onOpenEditSavings}
-        className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] hover:bg-[var(--card-hover)] transition cursor-pointer group flex flex-col justify-between space-y-2.5"
-        title="Click to edit savings"
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-[var(--muted)]">Savings</span>
-          <PencilSimple size={13} className="text-[var(--muted)] group-hover:text-[var(--foreground)] transition opacity-60 group-hover:opacity-100" />
-        </div>
-        <span
-          suppressHydrationWarning
-          className="text-lg sm:text-2xl font-bold tabular-nums text-[var(--foreground)] truncate block"
+    <div className="relative rounded-2xl bg-[var(--surface)] overflow-hidden select-none">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 p-6 sm:p-7">
+        {/* 1: Savings */}
+        <div
+          onClick={onOpenEditSavings}
+          className="cursor-pointer group flex flex-col justify-between space-y-2.5 rounded-xl -m-2.5 p-2.5 hover:bg-[var(--background)]/70 transition-colors"
+          title="Click to edit savings"
         >
-          {currency}{currentSavings.toLocaleString("en-IN")}
-        </span>
-        <span className="text-[11px] text-[var(--muted)] block truncate">
-          Click to edit
-        </span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-[var(--muted)]">Savings</span>
+            <span className="text-[11px] font-medium text-[var(--primary)] opacity-80 group-hover:opacity-100 transition-opacity">
+              Edit
+            </span>
+          </div>
+          <span
+            suppressHydrationWarning
+            className="text-xl sm:text-[28px] font-bold tracking-tight tabular-nums text-[var(--foreground)] truncate block leading-none"
+          >
+            {currency}{currentSavings.toLocaleString("en-IN")}
+          </span>
+          <span className="text-[11px] text-[var(--muted)] block truncate">
+            Available balance
+          </span>
+        </div>
+
+        {/* 2: Wishlist Total */}
+        <div className="flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-[var(--muted)]">Wishlist</span>
+            <span className="text-[11px] text-[var(--muted)] tabular-nums">
+              {activeCount} {activeCount === 1 ? "wish" : "wishes"}
+            </span>
+          </div>
+          <span
+            suppressHydrationWarning
+            className="text-xl sm:text-[28px] font-bold tracking-tight tabular-nums text-[var(--foreground)] truncate block leading-none"
+          >
+            {currency}{totalWishlistCost.toLocaleString("en-IN")}
+          </span>
+          <span className="text-[11px] text-[var(--muted)] block truncate">
+            Total target cost
+          </span>
+        </div>
+
+        {/* 3: Remaining Gap */}
+        <div className="flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-[var(--muted)]">Gap</span>
+            <span className="text-[11px] text-[var(--muted)] tabular-nums">
+              {gap === 0 && totalWishlistCost > 0 ? "Covered" : `${affordabilityPercent}%`}
+            </span>
+          </div>
+          <span
+            suppressHydrationWarning
+            className={`text-xl sm:text-[28px] font-bold tracking-tight tabular-nums truncate block leading-none ${
+              gap === 0 && totalWishlistCost > 0
+                ? "text-[var(--accent-green)]"
+                : "text-[var(--foreground)]"
+            }`}
+          >
+            {gap === 0 && totalWishlistCost > 0
+              ? "₹0"
+              : `${currency}${gap.toLocaleString("en-IN")}`}
+          </span>
+          <span className="text-[11px] text-[var(--muted)] block truncate">
+            {gap === 0 && totalWishlistCost > 0 ? "Fully covered" : "Remaining to save"}
+          </span>
+        </div>
+
+        {/* 4: Summary / Status */}
+        <div className="flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-medium text-[var(--muted)]">Readiness</span>
+            <span className="text-[11px] tabular-nums text-[var(--primary)] font-semibold">
+              {affordabilityPercent}%
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2 leading-none">
+            <span className="text-xl sm:text-[28px] font-bold tracking-tight tabular-nums text-[var(--foreground)]">
+              {affordableCount}
+            </span>
+            <span className="text-xs text-[var(--muted)]">
+              affordable now
+            </span>
+          </div>
+          <span className="text-[11px] text-[var(--muted)] block truncate">
+            {activeCount > 0 ? `Out of ${activeCount} active` : "No active wishes"}
+          </span>
+        </div>
       </div>
 
-      {/* 2: Wishlist Total */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-[var(--muted)]">Wishlist</span>
-          <span className="text-[11px] text-[var(--muted)] font-medium">
-            {activeCount} {activeCount === 1 ? "wish" : "wishes"}
-          </span>
-        </div>
-        <span
-          suppressHydrationWarning
-          className="text-lg sm:text-2xl font-bold tabular-nums text-[var(--foreground)] truncate block"
-        >
-          {currency}{totalWishlistCost.toLocaleString("en-IN")}
-        </span>
-        <span className="text-[11px] text-[var(--muted)] block truncate">
-          Total target cost
-        </span>
-      </div>
-
-      {/* 3: Remaining Gap */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-[var(--muted)]">Gap</span>
-          <span className="text-[11px] text-[var(--muted)] font-medium">
-            {gap === 0 && totalWishlistCost > 0 ? "Ready" : `${affordabilityPercent}%`}
-          </span>
-        </div>
-        <span
-          suppressHydrationWarning
-          className={`text-lg sm:text-2xl font-bold tabular-nums truncate block ${
-            gap === 0 && totalWishlistCost > 0
-              ? "text-[var(--accent-green)]"
-              : "text-[var(--foreground)]"
-          }`}
-        >
-          {gap === 0 && totalWishlistCost > 0
-            ? "₹0"
-            : `${currency}${gap.toLocaleString("en-IN")}`}
-        </span>
-        <span className="text-[11px] text-[var(--muted)] block truncate">
-          {gap === 0 && totalWishlistCost > 0 ? "Fully covered" : "Remaining to save"}
-        </span>
-      </div>
-
-      {/* 4: Summary / Status */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border-subtle)] flex flex-col justify-between space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-[var(--muted)]">Summary</span>
-          <span className="text-[11px] text-[var(--muted)] font-medium">
-            {affordabilityPercent}%
-          </span>
-        </div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-lg sm:text-2xl font-bold tabular-nums text-[var(--foreground)]">
-            {affordableCount}
-          </span>
-          <span className="text-xs text-[var(--muted)]">
-            affordable now
-          </span>
-        </div>
-        <div className="w-full h-1.5 rounded-full bg-[var(--surface-raised)] overflow-hidden">
-          <div
-            className="h-full bg-[var(--primary)] transition-all duration-500 rounded-full"
-            style={{ width: `${Math.min(100, affordabilityPercent)}%` }}
-          />
-        </div>
+      {/* Single Calibrated Progress Horizon across the bottom edge */}
+      <div className="h-[2px] w-full bg-[var(--surface-raised)]">
+        <div
+          className="h-full bg-[var(--primary)] transition-all duration-500"
+          style={{ width: `${Math.min(100, affordabilityPercent)}%` }}
+        />
       </div>
     </div>
   );

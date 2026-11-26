@@ -114,6 +114,83 @@ html.lenis body {
   font-family: var(--font-serif);
 }
 
+/* Motion reveal gating: invisible only when JS + motion are active before GSAP runs */
+html.motion [data-split],
+html.motion [data-reveal] {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.motion [data-split],
+  html.motion [data-reveal] {
+    visibility: visible !important;
+  }
+}
+
+/* Pointer-entry circular fill button */
+.btn-fill {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  transition: color 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.btn-fill .btn__fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--primary-hover);
+  clip-path: circle(0% at 50% 50%);
+  pointer-events: none;
+}
+.btn-fill.is-filled,
+.btn-fill:active {
+  color: var(--primary-foreground);
+}
+.btn-fill:active .btn__fill {
+  clip-path: circle(150% at 50% 50%);
+}
+.btn-fill .btn__arrow {
+  transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@media (hover: hover) {
+  .btn-fill:hover .btn__arrow {
+    transform: translateX(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-fill:focus-visible,
+  .btn-fill:hover {
+    background: var(--primary-hover);
+  }
+  .btn-fill .btn__fill {
+    display: none;
+  }
+}
+
+/* Hairline underline draw for index & footer links */
+.draw-line {
+  background: linear-gradient(currentColor 0 0) left bottom / 0% 1px no-repeat;
+  transition: background-size 0.45s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+@media (hover: hover) {
+  .draw-line:hover {
+    background-size: 100% 1px;
+  }
+}
+.draw-line:focus-visible {
+  background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .draw-line {
+    transition: none;
+  }
+}
+
+/* Focus-visible system accent ring */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
